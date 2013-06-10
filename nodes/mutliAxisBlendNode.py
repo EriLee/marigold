@@ -153,19 +153,6 @@ class MultiAxisBlendNode( OpenMayaMPx.MPxNode ):
         
             for a in range( outWeightPlug.numElements() ):
                 outWeightPlug[a].setFloat( rowPoints[row][a] )
-        '''
-        for r in range( outRowPlug.numElements() - 1 ):
-            outWeightPlug.selectAncestorLogicalIndex( r, outRowAttr )
-            outHandle = outWeightPlug.constructHandle( dataBlock )
-            arrayHandle = OpenMaya.MArrayDataHandle( outHandle )
-            arrayBuilder = arrayHandle.builder()
-            for a in range( outWeightPlug.numElements() ):
-                handle = arrayBuilder.addElement( a )
-                handle.setFloat( rowPoints[r][a] )
-            arrayHandle.set( arrayBuilder )
-            outWeightPlug.setMDataHandle( outHandle )
-            outWeightPlug.destructHandle( outHandle )
-        '''
 
 def scaleRange( inValue, inOrigRange, inNewRange ):
     return ( ( inValue - inOrigRange[0] ) / ( inOrigRange[1] - inOrigRange[0] ) ) * ( inNewRange[1] - inNewRange[0] ) + inNewRange[0]
