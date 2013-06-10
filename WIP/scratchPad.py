@@ -9,8 +9,121 @@ NOTES:
     a. Joint prefix in build settings.
 '''
 import sys
+import math
 import maya.OpenMaya as OpenMaya
-import adam.utility.NodeUtility as NodeUtility
+import marigold.utility.NodeUtility as NodeUtility
+
+#=================
+def scaleRange( inValue, inOrigRange, inNewRange ):
+    return ( ( inValue - inOrigRange[0] ) / ( inOrigRange[1] - inOrigRange[0] ) ) * ( inNewRange[1] - inNewRange[0] ) + inNewRange[0]
+
+# Inputs
+inX = NodeUtility.getPlug( 'multiAxisBlend1', 'inputX' )
+inY = NodeUtility.getPlug( 'multiAxisBlend1', 'inputY' )
+
+# Get values for input plugs
+xValue = NodeUtility.getPlugValue( inX )
+yValue = NodeUtility.getPlugValue( inY )
+print 'X,Y: {0},{1}'.format( xValue, yValue )
+# Blend points.
+blendRowPlug = NodeUtility.getPlug( 'multiAxisBlend1', 'blendRow' )
+blendRowAttr = blendRowPlug.attribute()
+blendWeightPlug = NodeUtility.getPlug( 'multiAxisBlend1', 'blendWeight' )
+
+# Out blends.
+outRowPlug = NodeUtility.getPlug( 'multiAxisBlend1', 'outRow' )
+outRowAttr = outRowPlug.attribute()
+outWeightPlug = NodeUtility.getPlug( 'multiAxisBlend1', 'outBlendWeight' )
+
+# For each row get the number of blend points.
+numRows = outRowPlug.numElements()
+
+gridLength = 2.0 # Both inputs range from -1 to 1. To make things easier we map this to 0.0 to 2.0
+rowPoints = []
+
+# Subtract 1 since Maya automatically adds an empty element at the end of the compound plug.
+for row in range( numRows ):
+    print 'ROW: {0}'.format( row )
+    rowPoints.append( [] )
+    outWeightPlug.selectAncestorLogicalIndex( row, outRowAttr )
+    
+    # Get the radius for all points in the row.
+    numPoints = outWeightPlug.numElements()
+    if numPoints > 1:
+        tempXLoc = 0.0
+        
+        # The first plug will be at zero X.
+        radius = gridLength / numPoints
+        xLoc = scaleRange( tempXLoc, [0.0, 2.0], [-1.0, +1.0] )
+        yLoc = scaleRange( row, [ 0.0, 2.0 ], [ +1.0, -1.0 ] )
+        print 'xLoc, yLoc: {0}, {1}'.format( xLoc, yLoc )
+        inputDistance = math.sqrt( ( xLoc - xValue )**2 + ( yLoc - yValue )**2 )
+        if inputDistance <= radius:
+            perc = ( inputDistance / radius ) * 100
+            rowPoints[row].append( ( 100 - perc ) / 100 )
+        else:
+            rowPoints[row].append( 0.0 )
+        
+        # Loop to get the remaining plug X locations.
+        for point in xrange( numPoints - 1 ):
+            xLoc = gridLength / ( numPoints - 1 )
+            tempXLoc = tempXLoc + xLoc
+            xLoc = scaleRange( tempXLoc, [0.0, 2.0], [-1.0, +1.0] )
+            yLoc = scaleRange( row, [ 0.0, 2.0 ], [ +1.0, -1.0 ] )
+            inputDistance = math.sqrt( ( xLoc - xValue )**2 + ( yLoc - yValue )**2 )
+            if inputDistance <= radius:
+                perc = ( inputDistance / radius ) * 100
+                rowPoints[row].append( ( 100 - perc ) / 100 )
+            else:
+                rowPoints[row].append( 0.0 )
+    else:
+        # Handle single point rows.
+        radius = 1.0 # Maximum for a single point in a row.
+        tempXLoc = 1.0
+        xLoc = scaleRange( tempXLoc, [0.0, 2.0], [-1.0, +1.0] )
+        yLoc = scaleRange( row, [ 0.0, 2.0 ], [ +1.0, -1.0 ] )
+        inputDistance = math.sqrt( ( xLoc - xValue )**2 + ( yLoc - yValue )**2 )
+        if inputDistance <= radius:
+            perc = ( inputDistance / radius ) * 100
+            rowPoints[row].append( ( 100 - perc ) / 100 )
+        else:
+            rowPoints[row].append( 0.0 )
+
+#for row in range( outRowPlug.numElements() ):
+    #outWeightPlug.selectAncestorLogicalIndex( row, outRowAttr )
+    for a in range( outWeightPlug.numElements() ):
+        #outWeightPlug[a].setFloat( rowPoints[row][a] )
+        print rowPoints[row][a]
+print rowPoints
+'''
+# Loop through the points to check their range against the X,Y inputs.
+# If they overlap then we set the blend weight for that point.
+print len( rowPoints )
+for p in xrange( len( rowPoints ) ):
+    inputDistance = math.sqrt( ( rowPoints[p][0] - xValue )**2 + ( rowPoints[p][1] - yValue )**2 )
+    print 'inputDistance: {0}'.format( inputDistance )
+    
+    if inputDistance <= rowPoints[p][2]:
+        perc = ( inputDistance / rowPoints[p][2] ) * 100
+        print ( 100 - perc ) / 100
+'''
+
+# Loop each row.
+for c in range( blendRowPlug.numElements()-1 ):
+    blendWeightPlug.selectAncestorLogicalIndex( c, blendRowAttr )
+    for a in range( blendWeightPlug.numElements() ):
+        #print blendWeightPlug[a].name()
+        pass
+
+for row in range( outRowPlug.numElements() ):
+    outWeightPlug.selectAncestorLogicalIndex( row, outRowAttr )
+    for a in range( outWeightPlug.numElements() ):
+        #print outWeightPlug[a].name()
+        #outWeightPlug[a].setFloat( 0.3 )
+        #print 'out: {0}'.format( rowPoints[row][1] )
+        pass
+
+#==================
 
 # GETS
 def getBits( inModule ):
@@ -323,5 +436,3 @@ def setDeformMesh():
                 MDGMod.doIt()
         if meshCheck is False:
             sys.stderr.write( 'This control object doesn\'t have a deformer mesh.' )
-                    
-setDeformMesh()

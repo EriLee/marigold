@@ -62,8 +62,8 @@ import maya.OpenMaya as OpenMaya
 import maya.OpenMayaMPx as OpenMayaMPx
 import maya.OpenMayaRender as OpenMayaRender
 import maya.OpenMayaUI as OpenMayaUI
-import adam.utility.NodeUtility as NodeUtility
-import adam.utility.TransformUtility as TransformUtility
+import marigold.utility.NodeUtility as NodeUtility
+import marigold.utility.TransformUtility as TransformUtility
 
 glRenderer = OpenMayaRender.MHardwareRenderer.theRenderer()
 glFT = glRenderer.glFunctionTable()

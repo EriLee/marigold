@@ -13,14 +13,14 @@ import xml.etree.ElementTree as ET
 import maya.cmds as cmds
 import maya.mel as mel
 import maya.OpenMaya as OpenMaya
-import adam.utility.NodeUtility as NodeUtility
+import marigold.utility.NodeUtility as NodeUtility
 
 CONTROLLER_PRESETS_PATH = 'controllers/presets/'
 
 def getPresetPath():
     scriptPaths = mel.eval( 'getenv MAYA_SCRIPT_PATH' ).split( ';' )
     for path in scriptPaths:
-        if path.find( 'adam' ) is not -1:
+        if path.find( 'marigold' ) is not -1:
             return path+'/'+CONTROLLER_PRESETS_PATH
     
 def createControlXML():

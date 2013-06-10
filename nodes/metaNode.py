@@ -3,7 +3,7 @@
     This file defines the meta classes used by the various rigging and tools.
 
 *USAGE*
-    import adam.nodes.metaNode as metaNode
+    import marigold.nodes.metaNode as metaNode
     
     node = MetaNode()
     node = MetaCharacter()

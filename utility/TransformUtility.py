@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-import adam.utility.NodeUtility as NodeUtility
+import marigold.utility.NodeUtility as NodeUtility
 
 # ============================
 # MATRIX

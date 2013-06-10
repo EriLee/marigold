@@ -9,9 +9,9 @@ TODO:
 import sys
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
-import adam.utility.XMLUtility as XMLUtility
-import adam.utility.TransformUtility as TransformUtility
-import adam.utility.NodeUtility as NodeUtility
+import marigold.utility.XMLUtility as XMLUtility
+import marigold.utility.TransformUtility as TransformUtility
+import marigold.utility.NodeUtility as NodeUtility
     
 class createManipulatorUI():
     def __init__( self, winName='createManipulatorUI' ):
