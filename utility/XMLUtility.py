@@ -16,12 +16,13 @@ import maya.OpenMaya as OpenMaya
 import marigold.utility.NodeUtility as NodeUtility
 
 CONTROLLER_PRESETS_PATH = 'controllers/presets/'
+FRAME_PRESETS_PATH = 'frames/presets/'
 
-def getPresetPath():
+def getPresetPath( inPresetPath=CONTROLLER_PRESETS_PATH ):
     scriptPaths = mel.eval( 'getenv MAYA_SCRIPT_PATH' ).split( ';' )
     for path in scriptPaths:
         if path.find( 'marigold' ) is not -1:
-            return path+'/'+CONTROLLER_PRESETS_PATH
+            return path+'/'+inPresetPath
     
 def createControlXML():
     '''
@@ -49,7 +50,7 @@ def createControlXML():
         
     # Browse for file to replace or new file to make.
     moduleFilter = "*.xml"
-    dialogResults = cmds.fileDialog2( fileFilter=moduleFilter, dialogStyle=2, startingDirectory=getPresetPath() )
+    dialogResults = cmds.fileDialog2( fileFilter=moduleFilter, dialogStyle=2, startingDirectory=getPresetPath( CONTROLLER_PRESETS_PATH ) )
     tempPath = dialogResults[0].split( '/' )
     fileName = tempPath[ len( tempPath )-1 ]
     filePath = dialogResults[0].rstrip( fileName )
@@ -112,7 +113,7 @@ def readControlXML():
     '''
     # Browse for file to replace or new file to make.
     moduleFilter = "*.xml"
-    dialogResults = cmds.fileDialog2( fileFilter=moduleFilter, dialogStyle=2, startingDirectory=getPresetPath() )
+    dialogResults = cmds.fileDialog2( fileFilter=moduleFilter, dialogStyle=2, startingDirectory=getPresetPath( CONTROLLER_PRESETS_PATH ) )
     
     returnDict = {}
     xmlDoc = ET.parse( dialogResults[0]  )
@@ -201,3 +202,25 @@ def applyXMLtoControl():
                                   [ float( attrList[ 'botBackRight' ][ 'value' ][0] ), float( attrList[ 'botBackRight' ][ 'value' ][1] ), float( attrList[ 'botBackRight' ][ 'value' ][2] ) ] )
         NodeUtility.setPlugValue( MFnDepNode.findPlug( 'botBackLeft' ),
                                   [ float( attrList[ 'botBackLeft' ][ 'value' ][0] ), float( attrList[ 'botBackLeft' ][ 'value' ][1] ), float( attrList[ 'botBackLeft' ][ 'value' ][2] ) ] )
+
+def getXMLInFolder( inPresetPath ):
+    '''
+    Finds all XML files in a directory.
+    @param inPresetPath: Preset path to search.
+    @return: List of module names.
+    '''
+    # Search the dir for all files of type XML
+    fileExt = '.xml'
+    fileList = []
+    fullPath = getPresetPath( inPresetPath )
+    for files in os.listdir( fullPath ):
+        if files.endswith( fileExt ): fileList.append( files )
+    
+    # Get rid of the file extension
+    tempList = []
+    for i in fileList:
+        tempName = i.split( '.' )
+        tempList.append( tempName[0] )
+        
+    # Return the list of names
+    return tempList
