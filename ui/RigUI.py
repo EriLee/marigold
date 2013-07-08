@@ -1,7 +1,6 @@
-import sys
 import maya.cmds as cmds
-import maya.OpenMaya as OpenMaya
 import marigold.utility.XMLUtility as XMLUtility
+import marigold.utility.GeneralUtility as GeneralUtility
 
 class createRigUI():
     def __init__( self, winName='createRigUI' ):
@@ -40,6 +39,7 @@ class createRigUI():
         cmds.rowColumnLayout( numberOfColumns=2, columnWidth=[(1, 40), (2, self.winWidth-40)] )
         # Left column.
         self.toggleColumn = cmds.rowColumnLayout( numberOfColumns=1 )
+        cmds.symbolCheckBox( image='icon_root.png', value=1, annotation='roots', changeCommand=self.fillButtons )
         cmds.symbolCheckBox( image='icon_spine.png', value=1, annotation='spines', changeCommand=self.fillButtons )
         cmds.symbolCheckBox( image='icon_arm.png', annotation='arms', changeCommand=self.fillButtons )
         cmds.symbolCheckBox( image='icon_leg.png', annotation='legs', changeCommand=self.fillButtons )
@@ -57,17 +57,16 @@ class createRigUI():
         cmds.setParent( '..' )#rowColumnLayout
         
         # Other
-        cmds.button()
-        cmds.button()
+        cmds.button( label='Save Selected Frame')
+        cmds.button( label='Link Frames' )
+        cmds.button( label='Delete Frame' )
         cmds.setParent( '..' )#tabLayout
 
         # TAB FRAME TOOLS
         self.tabFrame = cmds.rowColumnLayout( numberOfColumns=1 )
         cmds.text( label='Frame Tools', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
         cmds.separator( style='none', height=4 )
-        cmds.button()
-        cmds.button()
-        cmds.button()
+        cmds.button( label='Build', command=lambda v, a1='arms', a2='fkikArm': buttonBuildTemp( v, a1, a2 ) )
         cmds.setParent( '..' )#tabFrame
         
         # TAB RIGGING TOOLS
@@ -107,13 +106,28 @@ class createRigUI():
                     # Make the grid layout buttons. The label is the file name, while
                     # the annotation is the folder name.
                     cmds.button( parent=self.frameGrid, label=frame, annotation=boxAnno, command=lambda v, a1=frame, a2=boxAnno: buttonTest(v, a1, a2) )
-                    
+
+def buttonBuildTemp( *args ):
+    # Import the correct module via a string.
+    importPath = 'marigold/'+XMLUtility.FRAME_MODULES_PATH+args[1]+'/'+args[2]
+    #pathStrip = importPath.lstrip( 'E:/' )
+    pathFinal = importPath.replace( '/', '.' )
+    module = GeneralUtility.importModule( pathFinal )
+    module.buildModule()
+                       
 def buttonTest( *args ):
+    import marigold.utility.FrameUtility as FrameUtility
     # There are three arguments coming in.
     # Arg1: The value of the button pressed. This is automatically sent and ignored.
     # Arg2: The name of the XML file to open.
     # Arg3: The name of the folder the XML file is located.
-    print 'buttonTest: {0}'.format( args )
-    
+    FrameUtility.buildFrameModule( args[2], args[1] )
+    '''
+    dirPath = XMLUtility.getPresetPath( XMLUtility.FRAME_MODULES_PATH+args[2] )
+    fullPath = dirPath+'/'+args[1]+'.py'
+    print fullPath
+    #exec(compile(open("somefile.py").read(), "somefile.py", 'exec'), global_vars, local_vars)
+    #exec( compile( open( fullPath ).read(), args[1]+'.py', 'exec' ) )
+    '''
 
 createRigUI()

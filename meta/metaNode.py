@@ -15,6 +15,7 @@
 '''
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
+import marigold.utility.NodeUtility as NodeUtility
 
 VERSION = 1
 
@@ -23,7 +24,7 @@ class MetaNode( object ):
     '''
     Base class for all meta nodes.
     '''
-    def __init__( self, inNodeName=None, inNodeMetaType=None ):
+    def __init__( self, inNodeName='metaNode', inNodeMetaType='base' ):
         '''
         @param inNodeName: Name of the new meta node.
         @param inNodeMetaType: Type of meta node to create.
@@ -32,15 +33,13 @@ class MetaNode( object ):
         self.MFnDagNode = OpenMaya.MFnDagNode()
         self.MDGMod = OpenMaya.MDGModifier()
         
-        if not inNodeName:
-            self.inNodeName = 'metaNode'
-        if not inNodeMetaType:
-            self.inNodeMetaType = 'base'
-        
         # Set meta node type.
         self.node = cmds.createNode( 'network', name=self.inNodeName )
         cmds.addAttr( longName='metaType', dataType='string' )
         cmds.setAttr( '{0}.metaType'.format( self.node ), self.inNodeMetaType, type='string', lock=True )
+        
+        # Create meta class attr.
+        cmds.addAttr( longName='metaClass', dataType='string' )
         
         # Parent Attr
         cmds.addAttr( longName='metaParent', hidden=False, attributeType='message' )
@@ -75,76 +74,22 @@ class MetaCharacter( MetaNode ):
         # Create character group.
         characterGroup = cmds.createNode( 'transform', name='character' )
         cmds.addAttr( characterGroup, longName='metaParent', dataType='string')
-        connectNodes( self.inNodeName, 'characterGroup', 'character', 'metaParent' )
+        NodeUtility.connectNodes( self.inNodeName, 'characterGroup', 'character', 'metaParent' )
                 
         # Create frame group.
         frameGroup = cmds.createNode( 'transform', name='frame', parent='character' )     
         cmds.addAttr( frameGroup, longName='metaParent', dataType='string' )
-        connectNodes( self.inNodeName, 'frameGroup', 'frame', 'metaParent' )
+        NodeUtility.connectNodes( self.inNodeName, 'frameGroup', 'frame', 'metaParent' )
 
         # Create rig group.
         rigGroup = cmds.createNode( 'transform', name='rig', parent='character' )
         cmds.addAttr( rigGroup, longName='metaParent', dataType='string' )
-        connectNodes( self.inNodeName, 'rigGroup', 'rig', 'metaParent' )
+        NodeUtility.connectNodes( self.inNodeName, 'rigGroup', 'rig', 'metaParent' )
         
         # Create skeleton group.
         skeletonGroup = cmds.createNode( 'transform', name='skeleton', parent='character' )
         cmds.addAttr( skeletonGroup, longName='metaParent', dataType='string' )
-        connectNodes( self.inNodeName, 'skeletonGroup', 'skeleton', 'metaParent' )
-
-class MetaMapper( MetaNode ):
-    '''
-    Creates a node of the MetaNode type. This node holds information about the character
-    skeleton. Specifically it maps joints and joint chains to modules.
-    '''
-    def __init__( self ):
-        self.inNodeMetaType = 'mapper'
-        self.inNodeName = 'MetaMapper'        
-        super( MetaMapper, self ).__init__( self.inNodeName, self.inNodeMetaType )
-        
-    def addMap( self ):
-        pass
-    
-    def removeMap( self ):
-        pass
-
-# UTILITY
-def getDependNode( inObj ):
-    '''
-    @param inObj: String.
-    @return MObject.
-    '''
-    selList = OpenMaya.MSelectionList()
-    selList.add( inObj )
-    mObj = OpenMaya.MObject()
-    selList.getDependNode( 0, mObj )
-    return mObj
-
-def getPlug( inObj, inPlugName ):
-    '''
-    @param inObj: Depend Node.
-    @param inPlugName: String.
-    @return MPlug.
-    '''
-    mObj = getDependNode( inObj )
-    #print mObj.apiTypeStr()
-    depFn = OpenMaya.MFnDependencyNode()
-    depFn.setObject( mObj )
-    plug = depFn.findPlug( inPlugName )
-    return plug#.node()
-
-def connectNodes( inParentObj, inParentPlug, inChildObj, inChildPlug ):
-    '''
-    @param inParentObj: String. Name of parent node.
-    @param inParentPlug: String. Name of plug on parent node.
-    @param inChildObj: String. Name of child node.
-    @param inChildPlug: String. Name of plug on child node.
-    '''
-    parentPlug = getPlug( inParentObj, inParentPlug )
-    childPlug = getPlug( inChildObj, inChildPlug )
-    MDGMod = OpenMaya.MDGModifier()
-    MDGMod.connect( childPlug, parentPlug )
-    MDGMod.doIt()
+        NodeUtility.connectNodes( self.inNodeName, 'skeletonGroup', 'skeleton', 'metaParent' )
 
 def setupCharacterNodes( inDoModels=True ):
     '''
@@ -152,5 +97,3 @@ def setupCharacterNodes( inDoModels=True ):
     '''
     # Create the base meta node and organization groups for a character.
     MetaCharacter( inDoModels )
-
-setupCharacterNodes( True )

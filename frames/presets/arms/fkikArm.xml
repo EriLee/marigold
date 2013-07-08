@@ -1,0 +1,82 @@
+<data>
+	<metanode name="metaFKIKArm" metaType="frameModule" metaClass="fkikArm">
+		<plug name="jElbow" connected="True">frame_j_elbow.jointName</plug>
+		<plug name="buildPriority" connected="True">frame_root.buildPriority</plug>
+		<plug name="jShoulder" connected="True">frame_j_shoulder.jointName</plug>
+		<plug name="metaClass" connected="False">fkikArm</plug>
+		<plug name="fkElbowControlName" connected="True">frame_j_elbow.controlName</plug>
+		<plug name="metaType" connected="False">frameModule</plug>
+		<plug name="ikEnd" connected="True">frame_j_wrist.jointName</plug>
+		<plug name="ikRoot" connected="True">frame_j_shoulder.jointName</plug>
+		<plug name="fkElbowControl" connected="True">frame_j_elbow.controlType</plug>
+		<plug name="fkShoulderControl" connected="True">frame_j_shoulder.controlType</plug>
+		<plug name="prefix" connected="True">frame_root.prefix</plug>
+		<plug name="fkShoulderControlName" connected="True">frame_j_shoulder.controlName</plug>
+		<plug name="metaParent" connected="False">None</plug>
+		<plug name="rootBit" connected="True">frame_root.frameRoot</plug>
+		<plug name="ikEffControlName" connected="True">frame_j_wrist.controlName</plug>
+		<plug name="ikEffControl" connected="True">frame_j_wrist.controlType</plug>
+		<plug name="ikUpVecControl" connected="True">frame_upvec.controlType</plug>
+		<plug name="jWrist" connected="True">frame_j_wrist.jointName</plug>
+		<plug name="ikUpVecControlName" connected="True">frame_upvec.controlName</plug>
+	</metanode>
+	<bit name="frame_root" parent="|">
+		<plug name="prefix" attrType="dataType" attrDataType="typed">l</plug>
+		<plug name="buildPriority" attrType="attributeType" attrDataType="long">0</plug>
+		<plug name="frameRoot" attrType="dataType" attrDataType="typed"></plug>
+		<plug name="bitType" attrType="dataType" attrDataType="typed">rootX</plug>
+		<plug name="translateX">21.556272104</plug>
+		<plug name="translateY">195.792716715</plug>
+		<plug name="translateZ">-3.52526485349</plug>
+		<plug name="rotateX">0.0</plug>
+		<plug name="rotateY">-0.0</plug>
+		<plug name="rotateZ">0.0</plug>
+	</bit>
+	<bit name="frame_j_shoulder" parent="|frame_root">
+		<plug name="controlType" attrType="dataType" attrDataType="typed">glBox.shoulder</plug>
+		<plug name="jointName" attrType="dataType" attrDataType="typed">shoulder</plug>
+		<plug name="bitType" attrType="dataType" attrDataType="typed">ballY</plug>
+		<plug name="controlName" attrType="dataType" attrDataType="typed">shoulder</plug>
+		<plug name="translateX">0.0</plug>
+		<plug name="translateY">0.0</plug>
+		<plug name="translateZ">0.0</plug>
+		<plug name="rotateX">-53.7479286281</plug>
+		<plug name="rotateY">-0.0</plug>
+		<plug name="rotateZ">-48.0230269829</plug>
+	</bit>
+	<bit name="frame_j_elbow" parent="|frame_root|frame_j_shoulder">
+		<plug name="controlType" attrType="dataType" attrDataType="typed">glBox.elbow</plug>
+		<plug name="jointName" attrType="dataType" attrDataType="typed">elbow</plug>
+		<plug name="bitType" attrType="dataType" attrDataType="typed">hingeY</plug>
+		<plug name="controlName" attrType="dataType" attrDataType="typed">elbow</plug>
+		<plug name="translateX">30.2415693288</plug>
+		<plug name="translateY">2.84217094304e-14</plug>
+		<plug name="translateZ">1.42108547152e-14</plug>
+		<plug name="rotateX">0.0</plug>
+		<plug name="rotateY">-34.305003803</plug>
+		<plug name="rotateZ">0.0</plug>
+	</bit>
+	<bit name="frame_j_wrist" parent="|frame_root|frame_j_shoulder|frame_j_elbow">
+		<plug name="controlType" attrType="dataType" attrDataType="typed">glBox.hand</plug>
+		<plug name="jointName" attrType="dataType" attrDataType="typed">wrist</plug>
+		<plug name="bitType" attrType="dataType" attrDataType="typed">ballY</plug>
+		<plug name="controlName" attrType="dataType" attrDataType="typed">ik</plug>
+		<plug name="translateX">30.5178888112</plug>
+		<plug name="translateY">0.0</plug>
+		<plug name="translateZ">-2.84217094304e-14</plug>
+		<plug name="rotateX">-15.4882690366</plug>
+		<plug name="rotateY">8.53712377624</plug>
+		<plug name="rotateZ">-9.84780014548</plug>
+	</bit>
+	<bit name="frame_upvec" parent="|frame_root|frame_j_shoulder|frame_j_elbow">
+		<plug name="controlName" attrType="dataType" attrDataType="typed">upVec</plug>
+		<plug name="controlType" attrType="dataType" attrDataType="typed">glBox.upVec</plug>
+		<plug name="bitType" attrType="dataType" attrDataType="typed">triangleZ</plug>
+		<plug name="translateX">0.0</plug>
+		<plug name="translateY">0.0</plug>
+		<plug name="translateZ">-10.0</plug>
+		<plug name="rotateX">0.0</plug>
+		<plug name="rotateY">-0.0</plug>
+		<plug name="rotateZ">0.0</plug>
+	</bit>
+</data>

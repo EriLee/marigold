@@ -17,6 +17,7 @@ import marigold.utility.NodeUtility as NodeUtility
 
 CONTROLLER_PRESETS_PATH = 'controllers/presets/'
 FRAME_PRESETS_PATH = 'frames/presets/'
+FRAME_MODULES_PATH = 'frames/modules/'
 
 def getPresetPath( inPresetPath=CONTROLLER_PRESETS_PATH ):
     scriptPaths = mel.eval( 'getenv MAYA_SCRIPT_PATH' ).split( ';' )
@@ -96,7 +97,7 @@ def createControlXML():
         newfile.write( i+'\n' )
     newfile.close()
 
-def readControlXML():
+def readControlXML( inFile=None ):
     '''
     Processes an XML file to get the parts/settings for the module.
     
@@ -111,9 +112,12 @@ def readControlXML():
         </control>
     </data>
     '''
-    # Browse for file to replace or new file to make.
-    moduleFilter = "*.xml"
-    dialogResults = cmds.fileDialog2( fileFilter=moduleFilter, dialogStyle=2, startingDirectory=getPresetPath( CONTROLLER_PRESETS_PATH ) )
+    if inFile is None:
+        # Browse for file to replace or new file to make.
+        moduleFilter = "*.xml"
+        dialogResults = cmds.fileDialog2( fileFilter=moduleFilter, dialogStyle=2, startingDirectory=getPresetPath( CONTROLLER_PRESETS_PATH ) )
+    else:
+        dialogResults = [ inFile ]
     
     returnDict = {}
     xmlDoc = ET.parse( dialogResults[0]  )
@@ -134,12 +138,23 @@ def readControlXML():
     # return the list.
     return returnDict
 
-def createControlFromXML():
-    # Read the XML file.
-    attrList = readControlXML()
+def createControlFromXML( inType=None, inSubType=None, inControlName=None ):
+    if inType is None:    
+        # Read the XML file.
+        attrList = readControlXML()
+    else:
+        startingDirectory = getPresetPath( CONTROLLER_PRESETS_PATH )
+        presetPath = startingDirectory+inType+'/'+inSubType+'.xml'
+        attrList = readControlXML( presetPath )
         
     # Create the control.
-    cmds.rigController( name=attrList[ 'controller' ][ 'name' ], 
+    if inControlName is None:
+        ctName = attrList[ 'controller' ][ 'name' ]
+    else:
+        ctName = inControlName
+        
+    # Create the control.
+    cmds.rigController( name=ctName, 
                     position=( float( attrList[ 'localPosition' ][ 'value' ][0] ), float( attrList[ 'localPosition' ][ 'value' ][1] ), float( attrList[ 'localPosition' ][ 'value' ][2] ) ),
                     lineWidth=int( attrList[ 'lineWidth' ][ 'value' ] ),
                     rotate=( float( attrList[ 'rotate' ][ 'value' ][0] ), float( attrList[ 'rotate' ][ 'value' ][1] ), float( attrList[ 'rotate' ][ 'value' ][2] ) ),

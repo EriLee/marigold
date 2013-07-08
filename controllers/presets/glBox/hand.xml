@@ -1,0 +1,80 @@
+<data>
+	<control name="controller" type="ControlBox">
+		<attr name="color">
+			<value>0.20000000298</value>
+			<value>0.20000000298</value>
+			<value>0.5</value>
+		</attr>
+		<attr name="localPosition">
+			<value>0.0</value>
+			<value>0.0</value>
+			<value>0.0</value>
+		</attr>
+		<attr name="rotate">
+			<value>0.0</value>
+			<value>0.0</value>
+			<value>0.0</value>
+		</attr>
+		<attr name="transparency">
+			<value>0.5</value>
+		</attr>
+		<attr name="backAlpha">
+			<value>0.20000000298</value>
+		</attr>
+		<attr name="lineWidth">
+			<value>1</value>
+		</attr>
+		<attr name="width">
+			<value>1.0</value>
+		</attr>
+		<attr name="height">
+			<value>1.0</value>
+		</attr>
+		<attr name="depth">
+			<value>1.0</value>
+		</attr>
+		<attr name="drawType">
+			<value>2</value>
+		</attr>
+		<attr name="topFrontRight">
+			<value>0.102926015854</value>
+			<value>2.14841127396</value>
+			<value>5.47795009613</value>
+		</attr>
+		<attr name="topFrontLeft">
+			<value>11.0588254929</value>
+			<value>2.14841127396</value>
+			<value>5.47795009613</value>
+		</attr>
+		<attr name="topBackRight">
+			<value>0.102926015854</value>
+			<value>2.14841127396</value>
+			<value>-5.47795009613</value>
+		</attr>
+		<attr name="topBackLeft">
+			<value>11.0588254929</value>
+			<value>2.14841127396</value>
+			<value>-5.47795009613</value>
+		</attr>
+		<attr name="botFrontRight">
+			<value>0.102926015854</value>
+			<value>-2.14841127396</value>
+			<value>5.47795009613</value>
+		</attr>
+		<attr name="botFrontLeft">
+			<value>11.0588254929</value>
+			<value>-2.14841127396</value>
+			<value>5.47795009613</value>
+		</attr>
+		<attr name="botBackRight">
+			<value>0.102926015854</value>
+			<value>-2.14841127396</value>
+			<value>-5.47795009613</value>
+		</attr>
+		<attr name="botBackLeft">
+			<value>11.0588254929</value>
+			<value>-2.14841127396</value>
+			<value>-5.47795009613</value>
+		</attr>
+	</control>
+</data>

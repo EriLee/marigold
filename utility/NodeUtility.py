@@ -2,6 +2,71 @@ import types
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 
+def connectPlugs( inSourcePlug, inDestinationPlug ):
+    '''
+    Connects one plug to another.
+    
+    @param inSourcePlug: String. Name of the source plug. Node.Plug.
+    @param inDestinationPlug: String. Name of the destination plug. Node.Plug.
+    '''
+    cmds.connectAttr( inSourcePlug, inDestinationPlug, force=True )
+    
+def attributeCheck( inObj, inAttribute ):
+    '''
+    Check an object for a given attribute.
+    
+    @param inObj: String. Name of an object.
+    @param inAttribute: String. Name of an attribute. 
+    @return: True if the attribute exists. Otherwise False.
+    '''
+    depNode = getDependNode( inObj )
+    depFn = OpenMaya.MFnDependencyNode()
+    depFn.setObject( depNode )
+    return depFn.hasAttribute( inAttribute )
+
+def connectNodes( inParentObj, inParentPlug, inChildObj, inChildPlug ):
+    '''
+    @param inParentObj: String. Name of parent node.
+    @param inParentPlug: String. Name of plug on parent node.
+    @param inChildObj: String. Name of child node.
+    @param inChildPlug: String. Name of plug on child node.
+    '''
+    parentPlug = getPlug( inParentObj, inParentPlug )
+    childPlug = getPlug( inChildObj, inChildPlug )
+    MDGMod = OpenMaya.MDGModifier()
+    MDGMod.connect( childPlug, parentPlug )
+    MDGMod.doIt()
+    
+def getNodeAttrDestination( inNode, inAttr ):
+    '''
+    Gets the destination of an attribute on the given node.
+    
+    @param string inNode: Node with the desired attribute.
+    @param string inAttr: Name of source attribute.
+    @return: Returns list containing the destination attribute and it's node.
+    '''        
+    attrConnection = cmds.connectionInfo( '{0}.{1}'.format( inNode, inAttr ), destinationFromSource=True )
+    if attrConnection:
+        destInfo = attrConnection[0].split( '.' )
+        return destInfo
+    else:
+        return attrConnection
+
+def getNodeAttrSource( inNode, inAttr ):
+    '''
+    Gets the source of an attribute on the given node.
+    
+    @param string inNode: Node with the desired attribute.
+    @param string inAttr: Name of source attribute.
+    @return: Returns list containing the source attribute and it's node.
+    '''        
+    attrConnection = cmds.connectionInfo( '{0}.{1}'.format( inNode, inAttr ), sourceFromDestination=True )
+    if attrConnection:
+        destInfo = attrConnection.split( '.' )
+        return destInfo
+    else:
+        return attrConnection
+
 def getDependNode( inObj ):
     '''
     @param inObj: String.
@@ -53,7 +118,6 @@ def getPlugValue( inPlug ):
         result = []
         if inPlug.isCompound():
             for c in xrange( inPlug.numChildren() ):
-                #print inPlug.child( c ).attribute().apiTypeStr()
                 result.append( getPlugValue( inPlug.child( c ) ) )
             return result
     
@@ -65,17 +129,21 @@ def getPlugValue( inPlug ):
     elif apiType in [ OpenMaya.MFn.kDoubleAngleAttribute, OpenMaya.MFn.kFloatAngleAttribute ]:
         return inPlug.asMAngle().asDegrees()
     
-    # Typed - matrix
+    # TYPED
     elif apiType == OpenMaya.MFn.kTypedAttribute:
         pType = OpenMaya.MFnTypedAttribute( pAttribute ).attrType()
-        #print pType
+        
+        # Matrix
         if pType == OpenMaya.MFnData.kMatrix:
             return OpenMaya.MFnMatrixData( inPlug.asMObject() ).matrix()
-    
-    # Numbers
+        
+        # String
+        elif pType == OpenMaya.MFnData.kString:
+            return inPlug.asString()
+    # NUMBERS
     elif apiType == OpenMaya.MFn.kNumericAttribute:
         pType = OpenMaya.MFnNumericAttribute( pAttribute ).unitType()
-        #print pType
+
         if pType == OpenMaya.MFnNumericData.kBoolean:
             return inPlug.asBool()
         elif pType in [ OpenMaya.MFnNumericData.kShort, OpenMaya.MFnNumericData.kInt, OpenMaya.MFnNumericData.kLong, OpenMaya.MFnNumericData.kByte ]:
@@ -155,3 +223,20 @@ def setPlugValue( inPlug, inValue ):
     # Enums
     elif apiType == OpenMaya.MFn.kEnumAttribute:
         inPlug.setInt( inValue )
+        
+def getMetaNodesInScene( inNodeType ):
+    '''
+    Finds all nodes of a given type that exist in the active scene.
+    
+    @param string: Meta type to search for in the scene.
+    @return list: All meta nodes in the scene of the given meta type. 
+    '''
+    nodes = cmds.ls( type='network' )
+    nodeList = []
+    for node in nodes:
+        if attributeCheck( node, 'metaType' ):
+            aType = cmds.getAttr( '{0}.metaType'.format( node ) )
+            if aType == inNodeType:
+                tempList = ( node )
+                nodeList.append( tempList )
+    return nodeList

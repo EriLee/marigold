@@ -37,8 +37,10 @@ def getMatrixRotation( inObjMatrix, inType ):
     '''
     # Get the transform matrix of the object.
     transformMatrix = OpenMaya.MTransformationMatrix( inObjMatrix )
-    if inType == 'euler':
+    if inType == 'eulerVector':
         return transformMatrix.eulerRotation().asVector()
+    elif inType == 'euler':
+        return transformMatrix.eulerRotation()
     elif inType == 'quat':
         return transformMatrix.rotation()
 
@@ -65,10 +67,10 @@ def matchTransforms( inType ):
         MFnTrans = OpenMaya.MFnTransform()
         childDagPath = NodeUtility.getDagPath( cObj )
         MFnTrans.setObject( childDagPath )
-        childMatrix = getMatrix( tObj, 'worldMatrix' )
+        targetMatrix = getMatrix( tObj, 'worldMatrix' )
         if inType == 'tran' or inType == 'all':
-            childTranslation = getMatrixTranslation( childMatrix )
+            childTranslation = getMatrixTranslation( targetMatrix )
             MFnTrans.setTranslation( childTranslation, OpenMaya.MSpace.kWorld )
         if inType == 'rot' or inType == 'all':            
-            childRotation = getMatrixRotation( childMatrix, 'quat' )
+            childRotation = getMatrixRotation( targetMatrix, 'quat' )
             MFnTrans.setRotation( childRotation, OpenMaya.MSpace.kWorld )
