@@ -1,9 +1,10 @@
 import maya.cmds as cmds
+import maya.OpenMayaAnim as OpenMayaAnim
 import marigold.meta.metaNode as metaNode
-import marigold.utility.NodeUtility as NodeUtility
 import marigold.utility.FrameUtility as FrameUtility
 import marigold.controllers.marigoldControls as marigoldControls
 import marigold.skeleton.marigoldJoints as marigoldJoints
+import marigold.utility.NodeUtility as NodeUtility
 
 class MetaFrameFKIKArm( metaNode.MetaNode ):
     '''
@@ -16,6 +17,11 @@ class MetaFrameFKIKArm( metaNode.MetaNode ):
         super( MetaFrameFKIKArm, self ).__init__( self.inNodeName, self.inNodeMetaType )
     
     def createAttrs( self ):
+        cmds.setAttr( '{0}.metaClass'.format( self.node ), 'fkikArm', type='string', lock=True )
+        
+        cmds.addAttr( longName='buildFolder', dataType='string')
+        cmds.setAttr( '{0}.buildFolder'.format( self.node ), 'arms', type='string', lock=True )
+        
         cmds.addAttr( longName='buildPriority', attributeType='byte' )
         cmds.addAttr( longName='prefix', dataType='string' )
         cmds.addAttr( longName='rootBit', dataType='string' )
@@ -37,8 +43,9 @@ class MetaFrameFKIKArm( metaNode.MetaNode ):
         cmds.addAttr( longName='ikUpVecControlName', dataType='string' )
 
 def buildModule():
-    import maya.OpenMayaAnim as OpenMayaAnim
-    
+    '''
+    Build function for all the rigging associated with this module.
+    '''
     # Get the frame module meta nodes in the scene.
     modules = NodeUtility.getMetaNodesInScene( 'frameModule' )
     
@@ -65,7 +72,9 @@ def buildModule():
                    [nodeData['fkElbowControl'], nodeData['fkElbowControlName'], nodeData['jElbow'],elbowBit] ]
     for i in fkControls:
         # Create the spacer.
-        newSpacer = marigoldControls.makeControl().createSpacer( i[3], i[1], 'j_'+prefix+'_'+i[2], True )
+        spacerName = 'j_{0}_{1}'.format( prefix, i[2] )
+        newSpacer = marigoldControls.makeControl().createSpacer( i[3], i[1], spacerName, True )
+        
         # Create the controller.
         controlSplit = i[0].split( '.' )
         marigoldControls.makeControl().createController( controlSplit[0], controlSplit[1], i[1], newSpacer )
@@ -82,21 +91,22 @@ def buildModule():
     jointFn = OpenMayaAnim.MFnIkJoint()
 
     # IK root joint.
-    jointShoulder = 'j_'+prefix+'_'+nodeData['jShoulder']
+    jointShoulder = 'j_{0}_{1}'.format( prefix, nodeData['jShoulder'] )
     rootJointDagPath = NodeUtility.getDagPath( jointShoulder )
     
     # IK eff joint.
-    jointWrist = 'j_'+prefix+'_'+nodeData['jWrist']
+    jointWrist = 'j_{0}_{1}'.format( prefix, nodeData['jWrist'] ) 
     effJointDagPath = NodeUtility.getDagPath( jointWrist )
     
     # Do up the solver.
-    cmds.ikHandle( name=nodeData['ikEffControlName']+'_'+prefix+'_arm',
+    ikHandleName = '{0}_{1}_arm'.format( nodeData['ikEffControlName'], prefix )
+    cmds.ikHandle( name=ikHandleName,
                    startJoint=rootJointDagPath.fullPathName(),
                    endEffector=effJointDagPath.fullPathName(),
                    solver='ikRPsolver' )
-    cmds.parent( nodeData['ikEffControlName']+'_'+prefix+'_arm', 'ct_'+prefix+'_'+nodeData['ikEffControlName'], absolute=True )
     
-    cmds.poleVectorConstraint( 'ct_'+prefix+'_'+nodeData['ikUpVecControlName'], nodeData['ikEffControlName']+'_'+prefix+'_arm' )
+    effControlName = 'ct_{0}_{1}'.format( prefix, nodeData['ikEffControlName'] ) 
+    cmds.parent( ikHandleName, effControlName, absolute=True )
     
-def test():
-    print 'TESTING'
+    upVecControlName = 'ct_{0}_{1}'.format( prefix, nodeData['ikUpVecControlName'] )
+    cmds.poleVectorConstraint( upVecControlName, ikHandleName )

@@ -1,0 +1,30 @@
+<data>
+    <attributes>
+        <attr name="frameRoot" attrType="dataType" attrDataType="typed"></attr>
+        <attr name="buildPriority" attrType="attributeType" attrDataType="long"></attr>
+        <attr name="prefix" attrType="dataType" attrDataType="typed"></attr>
+        <attr name="bitType" attrType="dataType" attrDataType="typed"></attr>
+        <attr name="controlType" attrType="dataType" attrDataType="typed"></attr>
+        <attr name="controlName" attrType="dataType" attrDataType="typed"></attr>
+        <attr name="jointName" attrType="dataType" attrDataType="typed"></attr>
+    </attributes>
+    <presets>
+        <preset name="root">
+            <attr name="bitType"></attr>
+            <attr name="frameRoot"></attr>
+            <attr name="buildPriority"></attr>
+            <attr name="prefix"></attr>
+        </preset>
+        <preset name="control">
+            <attr name="bitType"></attr>
+            <attr name="controlType"></attr>
+            <attr name="controlName"></attr>
+        </preset>
+        <preset name="controlJoint">
+            <attr name="bitType"></attr>
+            <attr name="controlType"></attr>
+            <attr name="controlName"></attr>
+            <attr name="jointName"></attr>
+        </preset>
+    </presets>
+</data>

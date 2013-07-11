@@ -15,23 +15,16 @@ import marigold.skeleton.marigoldJoints as marigoldJoints
 - MAKE UI FOR CREATING META NODES
     - BOTTOM HALF OF UI FOR FILLING IN NODE ATTRIBUTES
     - SELECT THE NODE AND HIT REFRESH BUTTON
-X- MAKE FRAME MODULE META NODE
-    X- MAKE FKIKARM NODE
-    - HOOK UP NODE
-X- CREATE RIG
-    X- READ FRAME MODULE META NODE
-    X- CALL THE CORRECT MODULE SCRIPT
-        - BUILD
-            -SKELETON
-                -CONSTRAIN SKELETON TO SHADOW
-            X-SHADOW
-            X- FK RIG
-            X- IK RIG
-            - FKIK NODE
+- CREATE RIG
+    - CREATE BASIC ROOT
+    - CONNECT MODULES TO ROOT
+    - BUILD
+        -SKELETON
+            -CONSTRAIN SKELETON TO SHADOW
+        - FKIK NODE
 - FKIK NODE
 - SPACE SWITCH NODE
-X- SAVE FRAME MODULE XML
-X- LOAD FRAME MODULE XML
+- CLEAN UP LIBRARY. OPTIMISE IMPORTS
 '''
 # @@@@@
 #FrameUtility.createFrameModuleXML()
@@ -113,10 +106,18 @@ def buildFrameModule( inDir=None, inXMLFile=False ):
                 tick = tick+1
                 pass
         
-buildFrameModule( inDir='arms', inXMLFile='fkikArm' )
-# Create meta frame node.
+#buildFrameModule( inDir='arms', inXMLFile='fkikArm' )
+#FrameUtility.createFrameModuleXML()
 
-# Hook up plugs on the node.
-
-
+# Build module list for ui.
+moduleList = NodeUtility.getMetaNodesInScene( 'frameModule' )
+print moduleList
+newModule = {}
+for module in moduleList:
+    nodeAttrs = FrameUtility.getFrameBitSettings( module )    
+    newModule['priority'] = nodeAttrs['buildPriority']
+    newModule['frameName'] = module
+    newModule['modFolder'] = nodeAttrs['buildFolder']
+    newModule['modFile'] = nodeAttrs['metaClass']
+print newModule
     

@@ -15,6 +15,9 @@ class createRigUI():
         self.iconWidth = 32
         self.iconHeight = 32
         
+        # Window colors
+        self.rowColors = [[0.4,0.4,0.4],[0.5,0.5,0.5]]
+        
         # Clean up old uis before opening a new one.
         try:
             cmds.deleteUI( self.winName )
@@ -39,8 +42,8 @@ class createRigUI():
         cmds.rowColumnLayout( numberOfColumns=2, columnWidth=[(1, 40), (2, self.winWidth-40)] )
         # Left column.
         self.toggleColumn = cmds.rowColumnLayout( numberOfColumns=1 )
-        cmds.symbolCheckBox( image='icon_root.png', value=1, annotation='roots', changeCommand=self.fillButtons )
-        cmds.symbolCheckBox( image='icon_spine.png', value=1, annotation='spines', changeCommand=self.fillButtons )
+        cmds.symbolCheckBox( image='icon_root.png', value=0, annotation='roots', changeCommand=self.fillButtons )
+        cmds.symbolCheckBox( image='icon_spine.png', value=0, annotation='spines', changeCommand=self.fillButtons )
         cmds.symbolCheckBox( image='icon_arm.png', annotation='arms', changeCommand=self.fillButtons )
         cmds.symbolCheckBox( image='icon_leg.png', annotation='legs', changeCommand=self.fillButtons )
         cmds.symbolCheckBox( image='icon_hand.png', annotation='hands', changeCommand=self.fillButtons )
@@ -66,7 +69,14 @@ class createRigUI():
         self.tabFrame = cmds.rowColumnLayout( numberOfColumns=1 )
         cmds.text( label='Frame Tools', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
         cmds.separator( style='none', height=4 )
-        cmds.button( label='Build', command=lambda v, a1='arms', a2='fkikArm': buttonBuildTemp( v, a1, a2 ) )
+        
+        # Top rows.
+        self.moduleList = cmds.scrollLayout( horizontalScrollBarThickness=16, verticalScrollBarThickness=16, height=100 )
+        self.fillModuleList()
+        cmds.setParent( '..' )#moduleList    
+        # Bottom buttons
+        cmds.button( label='Refresh List', command=self.fillModuleList )
+        cmds.button( label='Build All' )
         cmds.setParent( '..' )#tabFrame
         
         # TAB RIGGING TOOLS
@@ -107,6 +117,55 @@ class createRigUI():
                     # the annotation is the folder name.
                     cmds.button( parent=self.frameGrid, label=frame, annotation=boxAnno, command=lambda v, a1=frame, a2=boxAnno: buttonTest(v, a1, a2) )
 
+    def fillModuleList( self, *args ):
+        from marigold.utility.NodeUtility import getMetaNodesInScene
+        from marigold.utility.FrameUtility import getFrameBitSettings
+        
+        # Clean up UI elements for refreshing the list.
+        lChildren = cmds.scrollLayout( self.moduleList, query=True, childArray=True )
+        if lChildren is not None:
+            for c in lChildren:
+                cmds.deleteUI( c )
+                #self.aRows = []
+        
+        # Build module list for ui.
+        moduleList = getMetaNodesInScene( 'frameModule' )
+        
+        previousColor = 2
+        warningPip = False
+        for i, module in enumerate( moduleList ):
+            print i, module
+            
+            # Get the required plug data.
+            moduleData = {}
+            nodeAttrs = getFrameBitSettings( module )    
+            moduleData['priority'] = nodeAttrs['buildPriority']
+            moduleData['frameName'] = module
+            moduleData['modFolder'] = nodeAttrs['buildFolder']
+            moduleData['modFile'] = nodeAttrs['metaClass']
+            
+            # Set the row color.
+            color = 1
+            if previousColor is 1:
+                color = 2
+                previousColor = 2
+            else:
+                color = 1
+                previousColor = 1
+                
+            # Make the row.
+            self.modListColumn = cmds.rowColumnLayout( parent=self.moduleList, numberOfColumns=6,
+                                                       columnWidth=[(1,26),(2,30),(3,90),(4,50),(5,50),(6,20)],
+                                                       columnSpacing=[(1,2),(2,2),(3,2),(4,2),(5,2),(6,2)],
+                                                       backgroundColor=self.rowColors[color-1] )
+            cmds.intField( editable=False, value=moduleData['priority'] )
+            cmds.image( image='icon_warning_pip.png', visible=warningPip )
+            cmds.text( label=moduleData['frameName'] )
+            cmds.button( label='options' )
+            cmds.button( label='build', command=lambda v, a1=moduleData['modFolder'], a2=moduleData['modFile']: buttonBuildTemp( v, a1, a2 ) )
+            cmds.checkBox( label='' )            
+            cmds.setParent( '..' )#self.modListColumn
+        
 def buttonBuildTemp( *args ):
     # Import the correct module via a string.
     importPath = 'marigold/'+XMLUtility.FRAME_MODULES_PATH+args[1]+'/'+args[2]
