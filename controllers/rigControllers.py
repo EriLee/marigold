@@ -292,9 +292,9 @@ class ControlBox( OpenMayaMPx.MPxLocatorNode ):
         
     def boundingBox( self ):
         # Creates a bounding box for the controller.
-        corner1 = OpenMaya.MPoint( self.bbp1.x, self.bbp1.y, self.bbp1.z )
-        corner2 = OpenMaya.MPoint( self.bbp2.x, self.bbp2.y, self.bbp2.z )
-        bbox = OpenMaya.MBoundingBox( corner1, corner2 )
+        #corner1 = OpenMaya.MPoint( self.bbp1.x, self.bbp1.y, self.bbp1.z )
+        #corner2 = OpenMaya.MPoint( self.bbp2.x, self.bbp2.y, self.bbp2.z )
+        bbox = OpenMaya.MBoundingBox( self.bbp1, self.bbp2 )
         return bbox
 
 def nodeCreator():

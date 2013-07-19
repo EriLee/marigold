@@ -6,7 +6,62 @@ import marigold.utility.NodeUtility as NodeUtility
 import marigold.utility.TransformUtility as TransformUtility
 import marigold.utility.XMLUtility as XMLUtility
 import marigold.utility.GeneralUtility as GeneralUtility
+import marigold.meta.metaNode as metaNode
 
+def setBitChild( inParent=None, inChild=None ):
+    '''
+    Connects the child object's matrix plug to the parent object's
+    targetWorldMatrix array plug. This plug's data is used by the parent's
+    draw() to render the hierarchy arrows.
+    
+    @param inParent: String. Name of the parent object.
+    @param inChild: String. Name of the child object.
+    '''
+    if inParent is None or inChild is None:
+        # Get selection and return the longnames of the objects.
+        selList = cmds.ls( selection=True, long=True )
+        if len(selList) is 2:
+            # The child is the first object.
+            # The parent is the second object.
+            child = selList[0]
+            parent = selList[1]
+    else:
+        child = inChild
+        parent = inParent
+            
+    # Get the parent shape's child matrix attribute.
+    pShape = cmds.listRelatives( parent, type='shape', allDescendents=False )[0]
+    shapeName = '{0}|{1}'.format( parent, pShape )
+    parentChildPlug = NodeUtility.getPlug( shapeName, 'targetWorldMatrix' )
+    
+    # This will connect the first time attempted.
+    attrName = 'targetWorldMatrix[{0}]'.format( parentChildPlug.numElements() )
+    fullParent = '{0}.{1}'.format( shapeName, attrName )
+    fullChild = '{0}.matrix'.format( child )
+    cmds.connectAttr( fullChild, fullParent, force=True )
+    
+    # Do any parenting now.
+    # Get the child's current parent.
+    childParent = cmds.listRelatives( child, parent=True, fullPath=True )
+    if childParent is None:
+        # Child object has no parent. Do parenting.
+        cmds.parent( child, parent )
+    else:
+        if childParent[0] != parent:
+            # Has different parent currently. Do parenting
+            cmds.parent( child, parent )
+        
+def deleteBitChild():
+    # Disconnected the child from it's parent.
+    selList = cmds.ls( selection=True, long=True )
+    for i in selList:
+        connections = NodeUtility.getNodeAttrDestination( i, 'matrix' )
+        parent = '{0}.{1}'.format( connections[0], connections[1] )
+        for plug in connections:
+            if plug.find( 'targetWorldMatrix' ) is not -1:
+                cmds.removeMultiInstance( parent, b=True )
+        cmds.parent( i, world=True )
+        
 def addPlug( inBit, inPlugName, inAttrType, inAttrDataType ):
     '''
     Adds a plug to the frame bit.
@@ -33,14 +88,16 @@ def setPlug( inBit, inPlugName, inPlugValue, inAttrDataType=None ):
     @param inPlugValue: String. The value of the plug.
     @param inAttrDataType: String. The attribute data type.
     '''
-    # Convert the value.
-    newValue = convertAttrString( inAttrDataType, inPlugValue )
-    if inAttrDataType == 'typed':
-        # It's a string so...
-        cmds.setAttr( '{0}.{1}'.format( inBit, inPlugName ), newValue, type='string', lock=False )
-    else:
-        # Everything else is a number!
-        cmds.setAttr( '{0}.{1}'.format( inBit, inPlugName ), newValue, lock=False )
+    lockState = cmds.getAttr( '{0}.{1}'.format( inBit, inPlugName), lock=True )
+    if lockState is False and inPlugValue != 'None':
+        # Convert the value.
+        newValue = convertAttrString( inAttrDataType, inPlugValue )
+        if inAttrDataType == 'string':
+            # It's a string so...
+            cmds.setAttr( '{0}.{1}'.format( inBit, inPlugName ), newValue, type='string', lock=False )
+        else:
+            # Everything else is a number!
+            cmds.setAttr( '{0}.{1}'.format( inBit, inPlugName ), newValue, lock=False )
 
 def convertAttrString( inAttrDataType, inValue ):
     '''
@@ -50,9 +107,11 @@ def convertAttrString( inAttrDataType, inValue ):
     @param inValue: String. Value to convert.
     @return: Correct value.
     '''
-    if inAttrDataType == 'long':
+    if inAttrDataType in [ 'long', 'enum' ]:
         return int( inValue )
-    elif inAttrDataType == 'typed':
+    elif inAttrDataType in [ 'doubleLinear', 'float', 'double' ]:
+        return float( inValue )
+    elif inAttrDataType == 'string':
         return str( inValue )
     elif inAttrDataType == 'bool':
         return bool( inValue )
@@ -68,11 +127,15 @@ def getFrameBitSettings( inFrameBit ):
     @param inFrameBit: String. Name of frame bit.
     @return: Dictionary. All the custom attributes on the frame bit.
     '''    
-    tempDict = {}
-    for attr in cmds.listAttr( inFrameBit, userDefined=True ):
-        plug = NodeUtility.getPlug( inFrameBit, attr )
-        plugValue = NodeUtility.getPlugValue( plug )
-        tempDict[ attr ] = plugValue
+    attrList = cmds.listAttr( inFrameBit, userDefined=True )
+    if attrList is not None:
+        tempDict = {}
+        for attr in attrList:
+            plug = NodeUtility.getPlug( inFrameBit, attr )
+            plugValue = NodeUtility.getPlugValue( plug )
+            tempDict[ attr ] = plugValue
+    else:
+        tempDict = None
     return tempDict
 
 def getFrameRootAllChildren( inFrameRootName ):
@@ -85,7 +148,6 @@ def getFrameRootAllChildren( inFrameRootName ):
     children = cmds.listRelatives( inFrameRootName, type='transform', allDescendents=True )
     tempList = []
     for child in children:
-        #print 'child: {0}'.format( child )
         tempList.insert( 0, child )
     return tempList
     
@@ -100,7 +162,6 @@ def getFrameRootChildren( inFrameDagNode ):
     for c in xrange( inFrameDagNode.childCount() ):
         child = inFrameDagNode.child( c )
         depFn.setObject( child )
-        print depFn.name()
         
 def getFramesInScene():
     # NEED TO HANDLE A SCENE WITH NO FRAMES.
@@ -152,10 +213,11 @@ def cleanParentFullName( inBitName ):
     @return: String. Cleaned up parent full path name.
     '''
     parent = cmds.listRelatives( inBitName, parent=True, fullPath=True )
-    parentSplit = parent[0].split('|')
-    parentSplit.pop(0)
-    parentSplit.pop(0)
-    return '|'+'|'.join( parentSplit )
+    if parent == None:
+        retParent = 'None'
+    else:
+        retParent = parent[0]
+    return retParent
 
 def getAttrTypes( inNode, inAttr ):
     '''
@@ -166,12 +228,16 @@ def getAttrTypes( inNode, inAttr ):
     @param inAttr: String. Name of attribute.
     @return: List. Attribute Type and Attribute Data Type.
     '''
-    attrDataType = cmds.addAttr( inNode+'.'+inAttr, query=True, attributeType=True )
+    attrString = '{0}.{1}'.format( inNode, inAttr )
+    attrDataType = cmds.getAttr( attrString, type=True )
     
-    if attrDataType in [ 'long', 'double', 'bool', 'enum' ]: attrType = 'attributeType'
-    elif attrDataType == 'typed': attrType = 'dataType'
-    
+    if attrDataType in [ 'string', 'matrix', 'TdataCompound' ]: attrType = 'dataType'
+    elif attrDataType in [ 'long', 'double', 'bool', 'enum', 'doubleLinear', 'float', 'byte', 'message' ]: attrType = 'attributeType'
+    # Certain attributes we don't want. So I pass a False flag which signals other functions
+    # to skip the attribute.
+    else: attrType = False
     return [ attrType, attrDataType ]
+    
     
 def createFrameModuleXML():
     # Browse for file to replace or new file to make.
@@ -181,10 +247,6 @@ def createFrameModuleXML():
     fullFileName = tempPath[ len( tempPath )-1 ]
     filePath = dialogResults[0].rstrip( fullFileName )
     fileName = fullFileName.split( '.' )[0]
-    
-    print 'filename: {0}'.format(fullFileName)
-    print 'filePath: {0}'.format(filePath)
-    print 'objName: {0}'.format(fileName)
     
     # Get the name of the selected node and it's plugs.
     selList = cmds.ls( selection=True )
@@ -203,18 +265,24 @@ def createFrameModuleXML():
         plug = NodeUtility.getPlug( node, attr )
         if plug.isConnected():
             connection = NodeUtility.getNodeAttrSource( node, attr )
-            xmlList.append( '\t\t<plug name=\"{0}\" connected=\"{1}\">{2}</plug>'.format( attr,
-                                                                                          True,
-                                                                                          connection[0]+'.'+connection[1] ) )
+            types = getAttrTypes( node, attr )
+            xmlList.append( '\t\t<plug name=\"{0}\" connected=\"{1}\" attrType=\"{2}\" attrDataType=\"{3}\">{4}</plug>'.format( attr,
+                                                                                                                                True,
+                                                                                                                                types[0],
+                                                                                                                                types[1],
+                                                                                                                                connection[0]+'.'+connection[1] ) )
         else:
-            xmlList.append( '\t\t<plug name=\"{0}\" connected=\"{1}\">{2}</plug>'.format( attr,
-                                                                                          False,
-                                                                                          NodeUtility.getPlugValue( plug ) ) )            
-            
+            types = getAttrTypes( node, attr )
+            xmlList.append( '\t\t<plug name=\"{0}\" connected=\"{1}\" attrType=\"{2}\" attrDataType=\"{3}\">{4}</plug>'.format( attr,
+                                                                                                                                False,
+                                                                                                                                types[0],
+                                                                                                                                types[1],
+                                                                                                                                NodeUtility.getPlugValue( plug ) ) )
     xmlList.append( '\t</metanode>' )
     
     # Get the root bit of the frame module.
     rootBit = NodeUtility.getNodeAttrSource( node, 'rootBit' )
+
     # Get the parent's full path. We need to remove the group name from the beginning as well.
     parent = cleanParentFullName( rootBit[0] )
 
@@ -239,6 +307,50 @@ def createFrameModuleXML():
     xmlList.append( '\t\t<plug name=\"rotateX\">{0}</plug>'.format( math.degrees(rot.x) ) )
     xmlList.append( '\t\t<plug name=\"rotateY\">{0}</plug>'.format( math.degrees(rot.y) ) )
     xmlList.append( '\t\t<plug name=\"rotateZ\">{0}</plug>'.format( math.degrees(rot.z) ) )
+    
+    # Shape nodes attributes.
+    rootShape = NodeUtility.getDagPath( rootBit[0] ).child( 0 )
+    depFn = OpenMaya.MFnDependencyNode( rootShape )
+    shapeName = cmds.listRelatives( rootBit[0], shapes=True, fullPath=True )[0]
+    shapeType = depFn.typeName()
+    xmlList.append( '\t\t<shape name=\"{0}\">'.format( shapeType ) )
+    
+    # Get the shape's local position and scale.
+    for attr in cmds.listAttr( shapeName, channelBox=True ):
+        types = getAttrTypes( shapeName, attr )
+        aPlug = NodeUtility.getPlug( shapeName, attr )
+        xmlList.append( '\t\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr,
+                                                                                                            types[0],
+                                                                                                            types[1],
+                                                                                                            NodeUtility.getPlugValue(aPlug) ) )
+        
+    # Get the shape's custom attributes.
+    for attr in cmds.listAttr( shapeName, multi=True, keyable=True ):
+        if attr.find( '[' ) is not -1:
+            # Special case handle array attributes. The [] needs to be removed so we can get
+            # the base name for the attribute. From there we can then loop through it's children.
+            # First we get the connection since these plugs won't return a value, but rather a
+            # connected node.
+            connection = NodeUtility.getNodeAttrSource( shapeName, attr )
+            bitChildren = cmds.listRelatives( rootBit[0], type='transform', children=True, fullPath=True )
+            for child in bitChildren:
+                if child.find( connection[0] ):
+                    plugValue = child
+            
+            # Now we get the compound attribute's name by removing the index brackets.
+            attrSplit = attr.split('[')
+            attr = attrSplit[0]
+        else:
+            aPlug = NodeUtility.getPlug( shapeName, attr )
+            plugValue = NodeUtility.getPlugValue( aPlug )
+            
+        types = getAttrTypes( shapeName, attr )
+        if types[0] is not False:
+            xmlList.append( '\t\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr,
+                                                                                                                types[0],
+                                                                                                                types[1],
+                                                                                                                plugValue ) )
+    xmlList.append( '\t\t</shape>' )
     xmlList.append( '\t</bit>')
 
     # Get all of the root's children.
@@ -248,16 +360,17 @@ def createFrameModuleXML():
         bitName = child
         parent = cleanParentFullName( child )
         childFrameAttrs = getFrameBitSettings( child )
-        
         xmlList.append( '\t<bit name=\"{0}\" parent=\"{1}\">'.format( bitName, parent ) )
     
-        for attr in childFrameAttrs:
-            types = getAttrTypes( child, attr )
-            plug = NodeUtility.getPlug( child, attr )
-            xmlList.append( '\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr,
-                                                                                                              types[0],
-                                                                                                              types[1],
-                                                                                                              NodeUtility.getPlugValue( plug ) ) )
+        # Transform nodes attributes.
+        if childFrameAttrs is not None:
+            for attr in childFrameAttrs:
+                types = getAttrTypes( child, attr )
+                plug = NodeUtility.getPlug( child, attr )
+                xmlList.append( '\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr,
+                                                                                                                  types[0],
+                                                                                                                  types[1],
+                                                                                                                  NodeUtility.getPlugValue( plug ) ) )
         
         # Get the position and rotation.
         wmBit = TransformUtility.getMatrix( child, 'matrix' )
@@ -270,6 +383,51 @@ def createFrameModuleXML():
         xmlList.append( '\t\t<plug name=\"rotateX\">{0}</plug>'.format( math.degrees(rot.x) ) )
         xmlList.append( '\t\t<plug name=\"rotateY\">{0}</plug>'.format( math.degrees(rot.y) ) )
         xmlList.append( '\t\t<plug name=\"rotateZ\">{0}</plug>'.format( math.degrees(rot.z) ) )
+        
+        # Shape nodes attributes.
+        childShape = NodeUtility.getDagPath( child ).child( 0 )
+        depFn = OpenMaya.MFnDependencyNode( childShape )
+        shapeName = cmds.listRelatives( child, shapes=True, fullPath=True )[0]
+        shapeType = depFn.typeName() 
+        xmlList.append( '\t\t<shape name=\"{0}\">'.format( shapeType ) )
+        
+        # Get the shape's local position and scale.
+        for attr in cmds.listAttr( shapeName, channelBox=True ):
+            types = getAttrTypes( shapeName, attr )
+            aPlug = NodeUtility.getPlug( shapeName, attr )
+            xmlList.append( '\t\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr,
+                                                                                                                types[0],
+                                                                                                                types[1],
+                                                                                                                NodeUtility.getPlugValue(aPlug) ) )
+            
+        # Get the shape's custom attributes.
+        for attr in cmds.listAttr( shapeName, multi=True, keyable=True ):
+            if attr.find( '[' ) is not -1:
+                # Special case handle array attributes. The [] needs to be removed so we can get
+                # the base name for the attribute. From there we can then loop through it's children.
+                # First we get the connection since these plugs won't return a value, but rather a
+                # connected node.
+                connection = NodeUtility.getNodeAttrSource( shapeName, attr )
+                bitChildren = cmds.listRelatives( child, type='transform', children=True, fullPath=True )
+                for c in bitChildren:
+                    if c.find( connection[0] ):
+                        plugValue = c
+                
+                # Now we get the compound attribute's name by removing the index brackets.
+                attrSplit = attr.split('[')
+                attr = attrSplit[0]
+            else:
+                aPlug = NodeUtility.getPlug( shapeName, attr )
+                plugValue = NodeUtility.getPlugValue( aPlug )
+                
+            types = getAttrTypes( shapeName, attr )
+            if types[0] is not False:
+                xmlList.append( '\t\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr,
+                                                                                                                    types[0],
+                                                                                                                    types[1],
+                                                                                                                    plugValue ) )
+        xmlList.append( '\t\t</shape>' )  
+        
         # Close the bit.
         xmlList.append( '\t</bit>' )
             
@@ -309,18 +467,27 @@ def readFrameModuleXML( inFile=None, inCallScript=False ):
         
         plugList = []
         for plug in metanode.findall( 'plug' ):
-            plugList.append( { 'name':plug.get('name'), 'connected':plug.get('connected'), 'value':plug.text } )
+            plugList.append( { 'name':plug.get('name'), 'connected':plug.get('connected'), 'attrType':plug.get('attrType'), 'attrDataType':plug.get('attrDataType'), 'value':plug.text } )
         returnDict[ 'metanode' ].update( { 'plugs':plugList } )
         
     # Process bit nodes.
     bitList = []
     for bit in xmlRoot.findall( 'bit' ):
-        bitDict = { 'name':bit.get('name'), 'parent':bit.get('parent') }
+        # Get shape type.
+        shape = bit.findall( 'shape' )
+        shapeType = shape[0].get('name')
+        
+        bitDict = { 'name':bit.get('name'), 'parent':bit.get('parent'), 'shapeType':shapeType }
         
         plugList = []
         for plug in bit.findall( 'plug' ):
             plugList.append( { 'name':plug.get('name'), 'attrType':plug.get('attrType'), 'attrDataType':plug.get('attrDataType'), 'value':plug.text } )
         bitDict[ 'plugs' ] = plugList
+        
+        shapePlugList = []
+        for plug in shape[0].findall( 'plug' ):
+            shapePlugList.append( { 'name':plug.get('name'), 'attrType':plug.get('attrType'), 'attrDataType':plug.get('attrDataType'), 'value':plug.text } )
+        bitDict[ 'shape' ] = shapePlugList
         
         bitList.append( bitDict )
         
@@ -333,10 +500,7 @@ def readFrameModuleXML( inFile=None, inCallScript=False ):
         # Or just return the list.
         return returnDict
 
-def buildFrameModule( inDir=None, inXMLFile=False ):
-    # Imports
-    import marigold.frames.bits.bits as Bits
-    
+def buildFrameModule( inDir=None, inXMLFile=None ):
     # Get the XML settings for the frame module.
     dirPath = XMLUtility.getPresetPath( XMLUtility.FRAME_PRESETS_PATH+inDir )
     fullPath = dirPath+'/'+inXMLFile+'.xml'
@@ -346,14 +510,18 @@ def buildFrameModule( inDir=None, inXMLFile=False ):
     metanode = xmlDict['metanode']
     meta = metanode['name']
     metaPlugs = metanode['plugs']
+    metaType = metanode['metaType']
+    metaClass = metanode['metaClass']
     
-    # Build the node.
-    buildModule = GeneralUtility.importModule( 'marigold.frames.modules.'+inDir+'.'+inXMLFile )
-    metanode = buildModule.MetaFrameFKIKArm()
-    # Need the node created, which points to the custom class.
-    # Till I figure a way to get the name through the API I'm going to use
-    # the fact that the node is selected after creation.
+    metanode = metaNode.MetaNode( inNodeName=meta, inNodeMetaType=metaType )
     metanode = cmds.ls( selection=True )[0]
+    
+    metaPlugs = xmlDict['metanode']['plugs']
+    for plug in metaPlugs:
+        if not NodeUtility.attributeCheck( metanode, plug['name'] ):
+            addPlug( metanode, plug['name'], plug['attrType'], plug['attrDataType'] )
+        if plug['connected'] == 'False':
+            setPlug( metanode, plug['name'], plug['value'], inAttrDataType=plug['attrDataType'] )
     
     # Get the bits.
     bits = xmlDict['bits']
@@ -361,31 +529,38 @@ def buildFrameModule( inDir=None, inXMLFile=False ):
     # Make a group for the module.
     for bit in bits:
         if bit['name'] == 'frame_root':
-            for plug in bit['plugs']: 
+            for plug in bit['plugs']:
                 if plug['name'] == 'prefix':
                     modulePrefix = plug['value']
-    moduleGroup = '|'+cmds.group( em=True, name=modulePrefix+'_fkikArm' )
+                    break
+                
+    moduleGroup = '|{0}'.format( cmds.group( em=True, name=modulePrefix+'_'+metaClass ) )
 
     # Make each bit.
     tick = 0
+    storeBitConnections = []
     while tick < len(bits):
         bitName = bits[0]['name']
-        bitParent = moduleGroup+bits[0]['parent']
+        if bits[0]['parent'] == 'None':
+            # This is the root bit. The | is there to represent this. We don't need it now.
+            # Plus it causes problems with the full path name stuff (double ||). So we
+            # remove it.
+            bitParent = moduleGroup
+        else:
+            bitParent = moduleGroup+bits[0]['parent']
         bitPlugs = bits[0]['plugs']
-        for plug in bitPlugs:
-            if plug['name'] == 'bitType':
-                bitType = plug['value']
+        bitShape = bits[0]['shape']
         
         # Make the bit.
-        if bitParent == 'None' or cmds.objExists( bitParent ):
-            newBit = Bits.frameBits( bitType, bitName )
+        if cmds.objExists( bitParent ):
+            newBit = cmds.makeGLBit( name=bitName, objecttype=bits[0]['shapeType'] )            
             cmds.parent( newBit, bitParent )
             
             # From this point we use the long name for the bit. This avoids any
             # name clashes.
-            fullBitName = bitParent+'|'+bitName 
+            fullBitName = '{0}{1}'.format( bitParent, newBit ) 
             
-            # Setup plugs.
+            # Setup plugs for transform and custom attributes.
             for plug in bitPlugs:
                 if not NodeUtility.attributeCheck( fullBitName, plug['name'] ):
                     addPlug( fullBitName, plug['name'], plug['attrType'], plug['attrDataType'] )
@@ -394,15 +569,31 @@ def buildFrameModule( inDir=None, inXMLFile=False ):
                 else:          
                     # Setup position and rotation.
                     setPlug( fullBitName, plug['name'], plug['value'] )
-                    
+            
                 # Connect plug to meta node.
-                for mplug in metaPlugs: 
-                    if bitName+'.'+plug['name'] == mplug['value']:
+                for mplug in metaPlugs:
+                    if '{0}.{1}'.format(bitName, plug['name']) == mplug['value']:
                         inSourcePlug = fullBitName+'.'+plug['name']
                         inDestinationPlug = metanode+'.'+mplug['name']
                         NodeUtility.connectPlugs( inSourcePlug, inDestinationPlug )
-            
+                        
+            # Setup plugs for shape attributes.
+            shapeName = cmds.listRelatives( fullBitName, shapes=True )
+            fullShapeName = '{0}|{1}'.format( fullBitName, shapeName[0] )
+            for plug in bitShape:
+                if plug['attrDataType'] == 'TdataCompound':
+                    # We skip compound nodes at this stage. They are for the child arrow drawing and must be
+                    # hooked up after all the objects are created.
+                    connectionChild = '{0}{1}'.format( moduleGroup, plug['value'] )
+                    storeBitConnections.append( { 'parent':fullBitName, 'child':connectionChild } )
+                else:
+                    setPlug( fullShapeName, plug['name'], plug['value'], inAttrDataType=plug['attrDataType'] )
+                           
             bits.remove( bits[0] )
         else:
             tick = tick+1
             pass
+    
+    # Now do the hook ups for the child arrows.
+    for i in storeBitConnections:
+        setBitChild( i['parent'], i['child'] )

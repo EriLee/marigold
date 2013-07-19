@@ -7,25 +7,10 @@ import marigold.utility.FrameUtility as FrameUtility
 import marigold.ui.deleteAttrUI as deleteAttrUI
 import xml.etree.ElementTree as ET
 import marigold.utility.XMLUtility as XMLUtility
+import marigold.meta.metaNode as metaNode
+import marigold.ui.SelectMetaUI as SelectMetaUI
 
 '''
-- BUTTONS FOR EACH BIT TYPE
-    - BITS NEED ALL THE APPROPRIATE ATTRIBUTES
-        - TAB WITH A LIST OF EACH POSSIBLE ATTRIBUTE
-            - ROOTS
-                -bitType
-                -frameRoot
-                -buildPriority
-                -prefix
-            - CONTROL
-                - bitType
-                - controlType
-                - controlName
-            - CONTROL W/ JOINT
-                - bitType
-                - controlType
-                - controlName
-                - jointName
 '''
 
 class createBitsUI():
@@ -59,22 +44,47 @@ class createBitsUI():
         cmds.formLayout( self.form, edit=True, attachForm=( (self.tabs, 'top', 0), (self.tabs, 'left', 0), (self.tabs, 'bottom', 0), (self.tabs, 'right', 0) ) )
         
         # Create each of the tabs.
+        # TAB: META NODES: START
+        self.tabMeta = cmds.rowColumnLayout( numberOfRows=2, width=self.winWidth )
+        
+        self.colMeta = cmds.rowColumnLayout( numberOfColumns=1, height=self.winHeight/2 )
+        cmds.text( label='Meta Nodes', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
+        cmds.separator( style='none', height=4 )
+        self.gridMeta = cmds.gridLayout( numberOfColumns=4, cellWidthHeight=( 50, 50 ) )        
+        cmds.button( label='Basic', command=lambda b, a1='frameModule': metaNode.MetaNode( inNodeMetaType=a1 ) )
+        cmds.button( label='Character', command=lambda b, a1=False: metaNode.MetaCharacter( doModel=a1 ) )
+        cmds.setParent( '..' )#self.gridMeta
+        cmds.setParent( '..' )#self.colMeta
+        
+        self.colMetaTools = cmds.rowColumnLayout( numberOfColumns=1 )
+        cmds.text( label='Tools', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
+        cmds.separator( style='none', height=4 )
+        self.rowMetaTools = cmds.rowColumnLayout( numberOfRows=1 )
+        cmds.button( label='Meta Node List', annotation='meta node list',
+                     command=lambda b: SelectMetaUI.selectMetaUI() )                       
+        cmds.setParent( '..' )#self.rowMetaTools
+        cmds.setParent( '..' )#self.colMetaTools
+
+        cmds.setParent( '..' )#self.tabMeta
+        # TAB: META NODES: END
+        
         # TAB: BITS, START
-        self.tabBits = cmds.rowColumnLayout( numberOfRows=2, width=self.winWidth )
+        self.tabBits = cmds.rowColumnLayout( numberOfRows=3, width=self.winWidth )
         
         self.bitsCol = cmds.rowColumnLayout( numberOfColumns=1, height=self.winHeight/2 )
         cmds.text( label='Bit Primitives', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
         cmds.separator( style='none', height=4 )
         self.bitsGrid = cmds.gridLayout( numberOfColumns=4, cellWidthHeight=( 50, 50 ) )
-        cmds.button( label='Sphere' )
-        cmds.button( label='Box' )
-        cmds.button( label='Cylinder' )
-        cmds.button( label='Torus' )
+        cmds.button( label='Sphere', command=lambda b, a1='glSphere': cmds.makeGLBit( objecttype=a1 ) )
+        cmds.button( label='Box', command=lambda b, a1='glBox': cmds.makeGLBit( objecttype=a1 ) )
+        cmds.button( label='Cylinder', command=lambda b, a1='glCylinder': cmds.makeGLBit( objecttype=a1 ) )
+        cmds.button( label='Cone', command=lambda b, a1='glCone': cmds.makeGLBit( objecttype=a1 ) )
+        cmds.button( label='Torus', command=lambda b, a1='glTorus': cmds.makeGLBit( objecttype=a1 ) )
         cmds.setParent( '..' )#self.bitsGrid
         cmds.setParent( '..' )#self.bitsCol
         
         self.toolsCol = cmds.rowColumnLayout( numberOfColumns=1 )
-        cmds.text( label='Tools', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
+        cmds.text( label='Transform Tools', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
         cmds.separator( style='none', height=4 )
         self.toolRow = cmds.rowColumnLayout( numberOfRows=1 )
         cmds.iconTextButton( annotation='match translation', style='iconOnly',
@@ -89,6 +99,15 @@ class createBitsUI():
         cmds.setParent( '..' )#self.toolRow
         cmds.setParent( '..' )#self.toolsCol
 
+        self.childCol = cmds.rowColumnLayout( numberOfColumns=1 )
+        cmds.text( label='Children Tools', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
+        cmds.separator( style='none', height=4 )
+        self.childRow = cmds.rowColumnLayout( numberOfColumns=2 )
+        cmds.button( label='Add Child', command=lambda b: FrameUtility.setBitChild() )
+        cmds.button( label='Remove Child', command=lambda b: FrameUtility.deleteBitChild() )
+        cmds.setParent( '..' )#self.childRow
+        cmds.setParent( '..' )#self.childCol
+        
         cmds.setParent( '..' )#self.tabBits
         # TAB: BITS, END
         
@@ -122,10 +141,25 @@ class createBitsUI():
         cmds.setParent( '..' )#self.attrPresets
         
         cmds.setParent( '..' )#self.tabAttrs
-        #TAB: ATTRIBUTES, END
+        # TAB: ATTRIBUTES, END
+        
+        # TAB: XML: START
+        self.tabXML = cmds.rowColumnLayout( numberOfRows=2, width=self.winWidth )
+        
+        self.colXML = cmds.rowColumnLayout( numberOfColumns=1, height=self.winHeight/2 )
+        cmds.text( label='XML Tools', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
+        cmds.separator( style='none', height=4 )        
+        cmds.button( label='Save Frame Module XML', command=lambda b: FrameUtility.createFrameModuleXML() )
+        cmds.setParent( '..' )#self.colXML
+
+        cmds.setParent( '..' )#self.tabXML
+        # TAB: XML: END
         
         # Added the tabs to the tab layout.
-        cmds.tabLayout( self.tabs, edit=True, tabLabel=( (self.tabBits, 'Bits'), (self.tabAttrs, 'Attributes') ) )
+        cmds.tabLayout( self.tabs, edit=True, tabLabel=( (self.tabMeta, 'Metas'),
+                                                         (self.tabBits, 'Bits'),
+                                                         (self.tabAttrs, 'Attributes'),
+                                                         (self.tabXML, 'XML') ) )
 
         # Show the window.
         cmds.showWindow( self.winName )
@@ -179,7 +213,7 @@ class createBitsUI():
             cmds.button( parent=self.presets, label=presetName,
                          annotation='Add attributes for a {0}'.format( presetName ),
                          command=lambda b, a1=presetName: self.addAttrPreset( a1 ) )
-            
+                    
     def addAttrPreset( self, inPresetName ):
         presetList = getAttrXML( presets=True )
         attrList = getAttrXML()
@@ -251,9 +285,7 @@ def getAttrXML( presets=False ):
     else:
         attrList = xmlRoot.find( 'attributes' )
         for attr in attrList.findall( 'attr' ):
-            returnList.append( { 'name':attr.get('name'), 'attrType':attr.get('attrType'), 'attrDataType':attr.get('attrDataType') } )
-    
+            returnList.append( { 'name':attr.get('name'), 'attrType':attr.get('attrType'), 'attrDataType':attr.get('attrDataType') } )    
     return returnList
     
-
 createBitsUI()

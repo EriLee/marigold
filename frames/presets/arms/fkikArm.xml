@@ -1,83 +1,231 @@
 <data>
-	<metanode name="metaFKIKArm" metaType="frameModule" metaClass="fkikArm">
-		<plug name="jElbow" connected="True">frame_j_elbow.jointName</plug>
-		<plug name="buildPriority" connected="True">frame_root.buildPriority</plug>
-		<plug name="buildFolder" connected="False">arms</plug>
-		<plug name="ikEffControlName" connected="True">frame_j_wrist.controlName</plug>
-		<plug name="fkElbowControlName" connected="True">frame_j_elbow.controlName</plug>
-		<plug name="metaType" connected="False">frameModule</plug>
-		<plug name="ikEnd" connected="True">frame_j_wrist.jointName</plug>
-		<plug name="ikRoot" connected="True">frame_j_shoulder.jointName</plug>
-		<plug name="fkElbowControl" connected="True">frame_j_elbow.controlType</plug>
-		<plug name="fkShoulderControl" connected="True">frame_j_shoulder.controlType</plug>
-		<plug name="prefix" connected="True">frame_root.prefix</plug>
-		<plug name="jShoulder" connected="True">frame_j_shoulder.jointName</plug>
-		<plug name="fkShoulderControlName" connected="True">frame_j_shoulder.controlName</plug>
-		<plug name="metaParent" connected="False">None</plug>
-		<plug name="rootBit" connected="True">frame_root.frameRoot</plug>
-		<plug name="ikUpVecControl" connected="True">frame_upvec.controlType</plug>
-		<plug name="ikEffControl" connected="True">frame_j_wrist.controlType</plug>
-		<plug name="metaClass" connected="False">fkikArm</plug>
-		<plug name="jWrist" connected="True">frame_j_wrist.jointName</plug>
-		<plug name="ikUpVecControlName" connected="True">frame_upvec.controlName</plug>
+	<metanode name="metaNode" metaType="frameModule" metaClass="fkikArm">
+		<plug name="jElbow" connected="True" attrType="dataType" attrDataType="string">frame_elbow.jointName</plug>
+		<plug name="jShoulder" connected="True" attrType="dataType" attrDataType="string">frame_shoulder.jointName</plug>
+		<plug name="buildPriority" connected="True" attrType="attributeType" attrDataType="long">frame_root.buildPriority</plug>
+		<plug name="metaType" connected="False" attrType="dataType" attrDataType="string">frameModule</plug>
+		<plug name="ikEffControlName" connected="True" attrType="dataType" attrDataType="string">frame_wrist.controlName</plug>
+		<plug name="fkElbowControlName" connected="True" attrType="dataType" attrDataType="string">frame_elbow.controlName</plug>
+		<plug name="buildFolder" connected="False" attrType="dataType" attrDataType="string">arms</plug>
+		<plug name="prefix" connected="True" attrType="dataType" attrDataType="string">frame_root.prefix</plug>
+		<plug name="ikRoot" connected="True" attrType="dataType" attrDataType="string">frame_shoulder.jointName</plug>
+		<plug name="fkElbowControl" connected="True" attrType="dataType" attrDataType="string">frame_elbow.controlType</plug>
+		<plug name="fkShoulderControl" connected="True" attrType="dataType" attrDataType="string">frame_shoulder.controlType</plug>
+		<plug name="ikEnd" connected="True" attrType="dataType" attrDataType="string">frame_wrist.jointName</plug>
+		<plug name="version" connected="False" attrType="attributeType" attrDataType="double">1.0</plug>
+		<plug name="fkShoulderControlName" connected="True" attrType="dataType" attrDataType="string">frame_shoulder.controlName</plug>
+		<plug name="metaParent" connected="False" attrType="attributeType" attrDataType="message">None</plug>
+		<plug name="rootBit" connected="True" attrType="dataType" attrDataType="string">frame_root.frameRoot</plug>
+		<plug name="ikUpVecControl" connected="True" attrType="dataType" attrDataType="string">frame_upVec.controlType</plug>
+		<plug name="ikEffControl" connected="True" attrType="dataType" attrDataType="string">frame_wrist.controlType</plug>
+		<plug name="metaClass" connected="False" attrType="dataType" attrDataType="string">fkikArm</plug>
+		<plug name="jWrist" connected="True" attrType="dataType" attrDataType="string">frame_wrist.jointName</plug>
+		<plug name="ikUpVecControlName" connected="True" attrType="dataType" attrDataType="string">frame_upVec.controlName</plug>
 	</metanode>
-	<bit name="frame_root" parent="|">
-		<plug name="prefix" attrType="dataType" attrDataType="typed">l</plug>
+	<bit name="frame_root" parent="None">
+		<plug name="prefix" attrType="dataType" attrDataType="string">l</plug>
+		<plug name="frameRoot" attrType="dataType" attrDataType="string"></plug>
+		<plug name="bitType" attrType="dataType" attrDataType="string"></plug>
 		<plug name="buildPriority" attrType="attributeType" attrDataType="long">0</plug>
-		<plug name="frameRoot" attrType="dataType" attrDataType="typed"></plug>
-		<plug name="bitType" attrType="dataType" attrDataType="typed">rootX</plug>
 		<plug name="translateX">21.556272104</plug>
 		<plug name="translateY">195.792716715</plug>
 		<plug name="translateZ">-3.52526485349</plug>
 		<plug name="rotateX">0.0</plug>
 		<plug name="rotateY">-0.0</plug>
 		<plug name="rotateZ">0.0</plug>
+		<shape name="glTorus">
+			<plug name="localPositionX" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionY" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionZ" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localScaleX" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleY" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleZ" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="rotateX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="backAlpha" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="lineWidth" attrType="attributeType" attrDataType="long">1</plug>
+			<plug name="colorR" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="colorG" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="colorB" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="transparency" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="childLinkColorR" attrType="attributeType" attrDataType="float">0.0313725508749</plug>
+			<plug name="childLinkColorG" attrType="attributeType" attrDataType="float">0.0313725508749</plug>
+			<plug name="childLinkColorB" attrType="attributeType" attrDataType="float">0.1254902035</plug>
+			<plug name="childTransparency" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="childArrowRadius" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="childArrowSegments" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="sides" attrType="attributeType" attrDataType="long">3</plug>
+			<plug name="rings" attrType="attributeType" attrDataType="long">8</plug>
+			<plug name="outerRadius" attrType="attributeType" attrDataType="float">6.0</plug>
+			<plug name="innerRadius" attrType="attributeType" attrDataType="float">5.59999990463</plug>
+			<plug name="drawType" attrType="attributeType" attrDataType="enum">2</plug>
+			<plug name="drawPlace" attrType="attributeType" attrDataType="enum">0</plug>
+			<plug name="targetWorldMatrix" attrType="dataType" attrDataType="TdataCompound">|frame_root|frame_upVec</plug>
+			<plug name="arrowLength" attrType="attributeType" attrDataType="float">1.20000004768</plug>
+		</shape>
 	</bit>
-	<bit name="frame_j_shoulder" parent="|frame_root">
-		<plug name="jointName" attrType="dataType" attrDataType="typed">shoulder</plug>
-		<plug name="controlType" attrType="dataType" attrDataType="typed">glBox.shoulder</plug>
-		<plug name="bitType" attrType="dataType" attrDataType="typed">ballY</plug>
-		<plug name="controlName" attrType="dataType" attrDataType="typed">shoulder</plug>
+	<bit name="frame_upVec" parent="|frame_root">
+		<plug name="controlName" attrType="dataType" attrDataType="string">upVec</plug>
+		<plug name="controlType" attrType="dataType" attrDataType="string">glBox.upVec</plug>
+		<plug name="bitType" attrType="dataType" attrDataType="string"></plug>
+		<plug name="translateX">18.4513746646</plug>
+		<plug name="translateY">-36.7735167674</plug>
+		<plug name="translateZ">-8.76615334983</plug>
+		<plug name="rotateX">123.706674273</plug>
+		<plug name="rotateY">-20.9385076394</plug>
+		<plug name="rotateZ">-19.9307217738</plug>
+		<shape name="glCone">
+			<plug name="localPositionX" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionY" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionZ" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localScaleX" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleY" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleZ" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="rotateX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="backAlpha" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="lineWidth" attrType="attributeType" attrDataType="long">1</plug>
+			<plug name="colorR" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="colorG" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="colorB" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="transparency" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="childLinkColorR" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="childLinkColorG" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="childLinkColorB" attrType="attributeType" attrDataType="float">0.40000000596</plug>
+			<plug name="childTransparency" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="childArrowRadius" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="childArrowSegments" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="segment" attrType="attributeType" attrDataType="long">3</plug>
+			<plug name="coneLength" attrType="attributeType" attrDataType="float">4.0</plug>
+			<plug name="radius" attrType="attributeType" attrDataType="float">2.0</plug>
+			<plug name="drawType" attrType="attributeType" attrDataType="enum">2</plug>
+			<plug name="drawPlace" attrType="attributeType" attrDataType="enum">2</plug>
+			<plug name="arrowLength" attrType="attributeType" attrDataType="float">2.0</plug>
+		</shape>
+	</bit>
+	<bit name="frame_shoulder" parent="|frame_root">
+		<plug name="controlName" attrType="dataType" attrDataType="string">shoulder</plug>
+		<plug name="controlType" attrType="dataType" attrDataType="string">glBox.shoulder</plug>
+		<plug name="bitType" attrType="dataType" attrDataType="string"></plug>
+		<plug name="jointName" attrType="dataType" attrDataType="string">shoulder</plug>
 		<plug name="translateX">0.0</plug>
 		<plug name="translateY">0.0</plug>
 		<plug name="translateZ">0.0</plug>
-		<plug name="rotateX">-53.7479286281</plug>
-		<plug name="rotateY">-0.0</plug>
-		<plug name="rotateZ">-48.0230269829</plug>
+		<plug name="rotateX">129.016354622</plug>
+		<plug name="rotateY">0.305511385788</plug>
+		<plug name="rotateZ">-48.4862662683</plug>
+		<shape name="glSphere">
+			<plug name="localPositionX" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionY" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionZ" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localScaleX" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleY" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleZ" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="rotateX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="backAlpha" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="lineWidth" attrType="attributeType" attrDataType="long">1</plug>
+			<plug name="colorR" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="colorG" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="colorB" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="transparency" attrType="attributeType" attrDataType="float">0.800000011921</plug>
+			<plug name="childLinkColorR" attrType="attributeType" attrDataType="float">0.0313725508749</plug>
+			<plug name="childLinkColorG" attrType="attributeType" attrDataType="float">0.0313725508749</plug>
+			<plug name="childLinkColorB" attrType="attributeType" attrDataType="float">0.1254902035</plug>
+			<plug name="childTransparency" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="childArrowRadius" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="childArrowSegments" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="latitude" attrType="attributeType" attrDataType="long">4</plug>
+			<plug name="longitude" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="radius" attrType="attributeType" attrDataType="float">5.0</plug>
+			<plug name="drawType" attrType="attributeType" attrDataType="enum">2</plug>
+			<plug name="targetWorldMatrix" attrType="dataType" attrDataType="TdataCompound">|frame_root|frame_shoulder|frame_elbow</plug>
+			<plug name="arrowLength" attrType="attributeType" attrDataType="float">1.20000004768</plug>
+		</shape>
 	</bit>
-	<bit name="frame_j_elbow" parent="|frame_root|frame_j_shoulder">
-		<plug name="jointName" attrType="dataType" attrDataType="typed">elbow</plug>
-		<plug name="controlType" attrType="dataType" attrDataType="typed">glBox.elbow</plug>
-		<plug name="bitType" attrType="dataType" attrDataType="typed">hingeY</plug>
-		<plug name="controlName" attrType="dataType" attrDataType="typed">elbow</plug>
-		<plug name="translateX">30.2415693288</plug>
-		<plug name="translateY">2.84217094304e-14</plug>
-		<plug name="translateZ">1.42108547152e-14</plug>
+	<bit name="frame_elbow" parent="|frame_root|frame_shoulder">
+		<plug name="controlName" attrType="dataType" attrDataType="string">elbow</plug>
+		<plug name="controlType" attrType="dataType" attrDataType="string">glBox.elbow</plug>
+		<plug name="bitType" attrType="dataType" attrDataType="string"></plug>
+		<plug name="jointName" attrType="dataType" attrDataType="string">elbow</plug>
+		<plug name="translateX">30.27213</plug>
+		<plug name="translateY">-1.42108547152e-14</plug>
+		<plug name="translateZ">0.0</plug>
 		<plug name="rotateX">0.0</plug>
-		<plug name="rotateY">-34.305003803</plug>
+		<plug name="rotateY">35.0716246446</plug>
 		<plug name="rotateZ">0.0</plug>
+		<shape name="glCylinder">
+			<plug name="localPositionX" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionY" attrType="attributeType" attrDataType="doubleLinear">-3.0</plug>
+			<plug name="localPositionZ" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localScaleX" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleY" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleZ" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="rotateX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="backAlpha" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="lineWidth" attrType="attributeType" attrDataType="long">1</plug>
+			<plug name="colorR" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="colorG" attrType="attributeType" attrDataType="float">0.800000011921</plug>
+			<plug name="colorB" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="transparency" attrType="attributeType" attrDataType="float">0.800000011921</plug>
+			<plug name="childLinkColorR" attrType="attributeType" attrDataType="float">0.0313725508749</plug>
+			<plug name="childLinkColorG" attrType="attributeType" attrDataType="float">0.0313725508749</plug>
+			<plug name="childLinkColorB" attrType="attributeType" attrDataType="float">0.1254902035</plug>
+			<plug name="childTransparency" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="childArrowRadius" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="childArrowSegments" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="segment" attrType="attributeType" attrDataType="long">8</plug>
+			<plug name="cylinderLength" attrType="attributeType" attrDataType="float">6.0</plug>
+			<plug name="radius" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="drawType" attrType="attributeType" attrDataType="enum">2</plug>
+			<plug name="drawPlace" attrType="attributeType" attrDataType="enum">1</plug>
+			<plug name="targetWorldMatrix" attrType="dataType" attrDataType="TdataCompound">|frame_root|frame_shoulder|frame_elbow|frame_wrist</plug>
+			<plug name="arrowLength" attrType="attributeType" attrDataType="float">1.20000004768</plug>
+		</shape>
 	</bit>
-	<bit name="frame_upvec" parent="|frame_root|frame_j_shoulder|frame_j_elbow">
-		<plug name="controlName" attrType="dataType" attrDataType="typed">upVec</plug>
-		<plug name="controlType" attrType="dataType" attrDataType="typed">glBox.upVec</plug>
-		<plug name="bitType" attrType="dataType" attrDataType="typed">triangleZ</plug>
-		<plug name="translateX">0.0</plug>
-		<plug name="translateY">0.0</plug>
-		<plug name="translateZ">-10.0</plug>
-		<plug name="rotateX">0.0</plug>
-		<plug name="rotateY">-0.0</plug>
-		<plug name="rotateZ">0.0</plug>
-	</bit>
-	<bit name="frame_j_wrist" parent="|frame_root|frame_j_shoulder|frame_j_elbow">
-		<plug name="jointName" attrType="dataType" attrDataType="typed">wrist</plug>
-		<plug name="controlType" attrType="dataType" attrDataType="typed">glBox.hand</plug>
-		<plug name="bitType" attrType="dataType" attrDataType="typed">ballY</plug>
-		<plug name="controlName" attrType="dataType" attrDataType="typed">ik</plug>
-		<plug name="translateX">30.5178888112</plug>
-		<plug name="translateY">0.0</plug>
+	<bit name="frame_wrist" parent="|frame_root|frame_shoulder|frame_elbow">
+		<plug name="controlName" attrType="dataType" attrDataType="string">ik</plug>
+		<plug name="controlType" attrType="dataType" attrDataType="string">glBox.hand</plug>
+		<plug name="bitType" attrType="dataType" attrDataType="string"></plug>
+		<plug name="jointName" attrType="dataType" attrDataType="string">wrist</plug>
+		<plug name="translateX">31.109134</plug>
+		<plug name="translateY">1.42108547152e-14</plug>
 		<plug name="translateZ">-2.84217094304e-14</plug>
-		<plug name="rotateX">-15.4882690366</plug>
-		<plug name="rotateY">8.53712377624</plug>
-		<plug name="rotateZ">-9.84780014548</plug>
+		<plug name="rotateX">-12.4041782672</plug>
+		<plug name="rotateY">-20.3078538034</plug>
+		<plug name="rotateZ">-10.1251197858</plug>
+		<shape name="glSphere">
+			<plug name="localPositionX" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionY" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionZ" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localScaleX" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleY" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleZ" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="rotateX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="backAlpha" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="lineWidth" attrType="attributeType" attrDataType="long">1</plug>
+			<plug name="colorR" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="colorG" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="colorB" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="transparency" attrType="attributeType" attrDataType="float">0.800000011921</plug>
+			<plug name="childLinkColorR" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="childLinkColorG" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="childLinkColorB" attrType="attributeType" attrDataType="float">0.40000000596</plug>
+			<plug name="childTransparency" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="childArrowRadius" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="childArrowSegments" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="latitude" attrType="attributeType" attrDataType="long">4</plug>
+			<plug name="longitude" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="radius" attrType="attributeType" attrDataType="float">4.0</plug>
+			<plug name="drawType" attrType="attributeType" attrDataType="enum">2</plug>
+			<plug name="arrowLength" attrType="attributeType" attrDataType="float">2.0</plug>
+		</shape>
 	</bit>
 </data>

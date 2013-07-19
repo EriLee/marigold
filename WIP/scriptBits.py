@@ -251,3 +251,12 @@ def buildRigging():
                 makeControl().createController( controlType, controlSubType, controlName, newSpacer )
             
             #3. Make custom shit
+            
+# Get vectors for drawing lines between this node and it's children.
+mPlug = OpenMaya.MPlug( self.thisMObject(), socketNode.attribute( 'targetWorldMatrix' ) )
+childrenList = []
+for c in xrange( mPlug.numChildren() ):
+    childPlug = mPlug.child( c )
+    mData = OpenMaya.MFnMatrixData( childPlug.asMObject() ).matrix()
+    mTrans = OpenMaya.MTransformationMatrix( mData )
+    childrenList.append( mTrans.getTranslation( OpenMaya.MSpace.kTransform ) )

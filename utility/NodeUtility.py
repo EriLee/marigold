@@ -224,7 +224,7 @@ def setPlugValue( inPlug, inValue ):
     elif apiType == OpenMaya.MFn.kEnumAttribute:
         inPlug.setInt( inValue )
         
-def getMetaNodesInScene( inNodeType ):
+def getMetaNodesInScene( inNodeType=None ):
     '''
     Finds all nodes of a given type that exist in the active scene.
     
@@ -234,9 +234,12 @@ def getMetaNodesInScene( inNodeType ):
     nodes = cmds.ls( type='network' )
     nodeList = []
     for node in nodes:
-        if attributeCheck( node, 'metaType' ):
-            aType = cmds.getAttr( '{0}.metaType'.format( node ) )
-            if aType == inNodeType:
-                tempList = ( node )
-                nodeList.append( tempList )
+        if attributeCheck( node, 'version' ):
+            if inNodeType is not None:
+                aType = cmds.getAttr( '{0}.metaType'.format( node ) )
+                if aType == inNodeType:
+                    tempList = ( node )
+                    nodeList.append( tempList )
+            else:
+                nodeList.append( node )
     return nodeList

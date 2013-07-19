@@ -130,6 +130,7 @@ class createRigUI():
         
         # Build module list for ui.
         moduleList = getMetaNodesInScene( 'frameModule' )
+        print moduleList
         
         previousColor = 2
         warningPip = False

@@ -3,7 +3,7 @@
     This file defines the meta classes used by the various rigging and tools.
 
 *USAGE*
-    import marigold.nodes.metaNode as metaNode
+    import marigold.meta.metaNode as metaNode
     
     node = MetaNode()
     node = MetaCharacter()
@@ -33,23 +33,42 @@ class MetaNode( object ):
         self.MFnDagNode = OpenMaya.MFnDagNode()
         self.MDGMod = OpenMaya.MDGModifier()
         
-        # Set meta node type.
-        self.node = cmds.createNode( 'network', name=self.inNodeName )
-        cmds.addAttr( longName='metaType', dataType='string' )
-        cmds.setAttr( '{0}.metaType'.format( self.node ), self.inNodeMetaType, type='string', lock=True )
+        self.metaType = inNodeMetaType
         
-        # Create meta class attr.
-        cmds.addAttr( longName='metaClass', dataType='string' )
+        # Create the meta node.
+        self.node = cmds.createNode( 'network', name=inNodeName )
         
-        # Parent Attr
-        cmds.addAttr( longName='metaParent', hidden=False, attributeType='message' )
-        
-        # Create attributes unique to the meta base node.
+        # Create the attributes.
         self.createAttrs()
         
     def createAttrs( self ):
+        # Generic attributes contained by all meta nodes.
+        # metaType: Type of meta node.
+        cmds.addAttr( longName='metaType', dataType='string' )
+        cmds.setAttr( '{0}.metaType'.format( self.node ), self.metaType, type='string', lock=True )
+        
+        # metaClass: This is the name of the custom class to call when creating
+        # anything related to this node and it's children.
+        cmds.addAttr( longName='metaClass', dataType='string' )
+        
+        # Version: What version of the meta system was used to create the network.
         cmds.addAttr( longName='version', attributeType='double' )
         cmds.setAttr( '{0}.version'.format( self.node ), VERSION, lock=True )
+        
+        if self.metaType == 'character':
+            # Attributes for the metaRoot node. This is the top most meta node in
+            # the network.
+            cmds.addAttr( longName='metaChildren', dataType='string' )
+            
+        elif self.metaType == 'frameModule':
+            # rootBit: The frame root of the frame module associated with the meta
+            # node.
+            cmds.addAttr( longName='rootBit', dataType='string' )
+            
+        if self.metaType is not 'character':
+            # metaParent: Parent of this meta node in the network. Should point
+            # meta node. 
+            cmds.addAttr( longName='metaParent', hidden=False, attributeType='message' )
 
 class MetaCharacter( MetaNode ):
     '''
@@ -59,12 +78,13 @@ class MetaCharacter( MetaNode ):
     #def __init__( self, *args, **kws ):
     def __init__( self, doModel=True ):
         self.inNodeMetaType = 'character'
-        self.inNodeName = 'MetaCharacter'        
+        self.inNodeName = 'metaCharacter'  
         super( MetaCharacter, self ).__init__( self.inNodeName, self.inNodeMetaType )
         if doModel:
             self.makeGroups()
     
     def createAttrs( self ):
+        super( MetaCharacter, self ).createAttrs()
         cmds.addAttr( longName='characterGroup', dataType='string' )
         cmds.addAttr( longName='frameGroup', dataType='string' )
         cmds.addAttr( longName='rigGroup', dataType='string' )
