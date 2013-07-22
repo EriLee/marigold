@@ -1,5 +1,6 @@
 import math
 import os
+import sys
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 import marigold.utility.NodeUtility as NodeUtility
@@ -8,6 +9,42 @@ import marigold.utility.XMLUtility as XMLUtility
 import marigold.utility.GeneralUtility as GeneralUtility
 import marigold.meta.metaNode as metaNode
 
+def copyBitSettings():
+    '''
+    Copies the bit shape settings (OpenGL stuff) from the second object to the
+    first (in selection order).
+    '''
+    selList = cmds.ls( selection=True, long=True )
+    depFn = OpenMaya.MFnDependencyNode()
+    
+    if len(selList) == 2:
+        # First object is target.
+        targetShape = cmds.listRelatives( selList[0], shapes=True, fullPath=True )[0]
+        targetShapeMObj = NodeUtility.getDependNode( targetShape )
+        depFn.setObject( targetShapeMObj )
+        targetShapeType = depFn.typeName()
+        
+        # Second object is source.
+        sourceShape = cmds.listRelatives( selList[1], shapes=True, fullPath=True )[0]
+        sourceShapeMObj = NodeUtility.getDependNode( sourceShape )
+        depFn.setObject( sourceShapeMObj )
+        sourceShapeType = depFn.typeName()
+        
+        if targetShapeType == sourceShapeType:        
+            # The types match. Do the copy of attribute settings.
+            for attr in cmds.listAttr( sourceShape, multi=True, keyable=True ):
+                # Get the plugs.
+                sourcePlug = NodeUtility.getPlug( sourceShape, attr )
+                targetPlug = NodeUtility.getPlug( targetShape, attr )
+                
+                # Get the source plug value.
+                sourcePlugValue = NodeUtility.getPlugValue( sourcePlug )
+                
+                # Set the target's plug value.
+                NodeUtility.setPlugValue( targetPlug, sourcePlugValue )
+        else:
+            raise ValueError( '{0} and {1} do not match.'.format( selList[0], selList[1] ) )
+    
 def setBitChild( inParent=None, inChild=None ):
     '''
     Connects the child object's matrix plug to the parent object's
@@ -163,6 +200,21 @@ def getFrameRootChildren( inFrameDagNode ):
         child = inFrameDagNode.child( c )
         depFn.setObject( child )
         
+def getFramesInSceneWIP():
+    # Get all the meta nodes in the scene.
+    metaNodes = NodeUtility.getMetaNodesInScene()
+    print metaNodes
+    
+    if not metaNodes:
+        return None
+    else:
+        for node in metaNodes:
+            # Get the root bit of the frame module.
+            rootBit = NodeUtility.getNodeAttrSource( node, 'rootBit' )
+            # Get the parent's full path. We need to remove the group name from the beginning as well.
+            parent = cleanParentFullName( rootBit[0] )
+            print parent
+
 def getFramesInScene():
     # NEED TO HANDLE A SCENE WITH NO FRAMES.
     '''
@@ -282,6 +334,8 @@ def createFrameModuleXML():
     
     # Get the root bit of the frame module.
     rootBit = NodeUtility.getNodeAttrSource( node, 'rootBit' )
+    if not rootBit:
+        raise ValueError( 'The meta node\'s ({0}) ROOT BIT attribute is not connected.'.format(node) )
 
     # Get the parent's full path. We need to remove the group name from the beginning as well.
     parent = cleanParentFullName( rootBit[0] )

@@ -170,7 +170,6 @@ class createRigUI():
 def buttonBuildTemp( *args ):
     # Import the correct module via a string.
     importPath = 'marigold/'+XMLUtility.FRAME_MODULES_PATH+args[1]+'/'+args[2]
-    #pathStrip = importPath.lstrip( 'E:/' )
     pathFinal = importPath.replace( '/', '.' )
     module = GeneralUtility.importModule( pathFinal )
     module.buildModule()

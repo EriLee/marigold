@@ -71,7 +71,7 @@ class createBitsUI():
         # TAB: BITS, START
         self.tabBits = cmds.rowColumnLayout( numberOfRows=3, width=self.winWidth )
         
-        self.bitsCol = cmds.rowColumnLayout( numberOfColumns=1, height=self.winHeight/2 )
+        self.bitsCol = cmds.rowColumnLayout( numberOfColumns=1, height=self.winHeight/3 )
         cmds.text( label='Bit Primitives', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
         cmds.separator( style='none', height=4 )
         self.bitsGrid = cmds.gridLayout( numberOfColumns=4, cellWidthHeight=( 50, 50 ) )
@@ -100,11 +100,12 @@ class createBitsUI():
         cmds.setParent( '..' )#self.toolsCol
 
         self.childCol = cmds.rowColumnLayout( numberOfColumns=1 )
-        cmds.text( label='Children Tools', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
+        cmds.text( label='General Tools', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
         cmds.separator( style='none', height=4 )
         self.childRow = cmds.rowColumnLayout( numberOfColumns=2 )
         cmds.button( label='Add Child', command=lambda b: FrameUtility.setBitChild() )
         cmds.button( label='Remove Child', command=lambda b: FrameUtility.deleteBitChild() )
+        cmds.button( label='Copy Settings', command=lambda b: FrameUtility.copyBitSettings() )
         cmds.setParent( '..' )#self.childRow
         cmds.setParent( '..' )#self.childCol
         
