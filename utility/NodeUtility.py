@@ -200,6 +200,11 @@ def setPlugValue( inPlug, inValue ):
         if pType == OpenMaya.MFnData.kMatrix:
             OpenMaya.MGlobal.displayError( 'Matrix setting hasn\'t been setup yet.' )
             return OpenMaya.MFnMatrixData( inPlug.asMObject() ).matrix()
+        
+        # String
+        elif pType == OpenMaya.MFnData.kString:
+            value = inValue
+            inPlug.setString( value )
     
     # Numbers
     elif apiType == OpenMaya.MFn.kNumericAttribute:

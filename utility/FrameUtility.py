@@ -182,7 +182,7 @@ def getFrameRootAllChildren( inFrameRootName ):
     @param inFrameRootName: String. Name of frame root object.
     @return: List of children. Ordered from highest to lowest in the hierarchy.
     '''
-    children = cmds.listRelatives( inFrameRootName, type='transform', allDescendents=True )
+    children = cmds.listRelatives( inFrameRootName, type='transform', allDescendents=True, fullPath=True )
     tempList = []
     for child in children:
         tempList.insert( 0, child )
@@ -593,6 +593,7 @@ def buildFrameModule( inDir=None, inXMLFile=None ):
     # Make each bit.
     tick = 0
     storeBitConnections = []
+
     while tick < len(bits):
         bitName = bits[0]['name']
         if bits[0]['parent'] == 'None':
@@ -612,7 +613,10 @@ def buildFrameModule( inDir=None, inXMLFile=None ):
             
             # From this point we use the long name for the bit. This avoids any
             # name clashes.
-            fullBitName = '{0}{1}'.format( bitParent, newBit ) 
+            fullBitName = '{0}{1}'.format( bitParent, newBit )
+            # Get the frame_root for the module. We want to return this at the very end.
+            if bitName == 'frame_root':
+                rootFullName = fullBitName
             
             # Setup plugs for transform and custom attributes.
             for plug in bitPlugs:
@@ -651,3 +655,138 @@ def buildFrameModule( inDir=None, inXMLFile=None ):
     # Now do the hook ups for the child arrows.
     for i in storeBitConnections:
         setBitChild( i['parent'], i['child'] )
+    
+    return rootFullName
+
+def mirrorObjectPrompt():
+    form = cmds.setParent(q=True)
+    cmds.formLayout(form, e=True, width=300)
+
+    t = cmds.text(l='Which axis to mirror across?')
+
+    b1 = cmds.button(l='X', c='cmds.layoutDialog( dismiss="0" )' )
+    b2 = cmds.button(l='Y', c='cmds.layoutDialog( dismiss="1" )' )
+    b3 = cmds.button(l='Z', c='cmds.layoutDialog( dismiss="2" )' )
+
+    spacer = 5
+    top = 5
+    edge = 5
+
+    cmds.formLayout(form, edit=True,
+                    attachForm=[(t, 'top', top), (t, 'left', edge), (t, 'right', edge), (b1, 'left', edge), (b3, 'right', edge)],
+                    attachNone=[(t, 'bottom'), (b1, 'bottom'), (b2, 'bottom'), (b3, 'bottom')],
+                    attachControl=[(b1, 'top', spacer, t), (b2, 'top', spacer, t), (b3, 'top', spacer, t)],
+                    attachPosition=[(b1, 'right', spacer, 33), (b2, 'left', spacer, 33), (b2, 'right', spacer, 66), (b3, 'left', spacer, 66)])
+    
+def mirrorObject( inSourceObj=None, inTargetObj=None, inMirrorAxis=None ):
+    # Mirrors the position and rotation of one object(source) and applies it to another (target).
+    
+    if inSourceObj is None or inTargetObj is None:
+        # Target object should be selected first, followed by source object.
+        selList = cmds.ls( selection=True, long=True )
+        if len( selList ) == 2:
+            inTargetObj = selList[0]
+            inSourceObj = selList[1]
+        
+    if inMirrorAxis is None:
+        inMirrorAxis = int( cmds.layoutDialog( ui=mirrorObjectPrompt ) )
+        
+    if inMirrorAxis is not None:
+        # Get the source module's root world matrix.
+        sourceWorldMatrix = TransformUtility.getMatrix( inSourceObj, 'worldMatrix' )
+        
+        # Get the source's translation vector.
+        sourceWorldTranslation = TransformUtility.getMatrixTranslation( sourceWorldMatrix )
+        
+        # Get the source's rotation matrix.
+        sourceRotationMatrix = OpenMaya.MTransformationMatrix( sourceWorldMatrix ).asRotateMatrix()
+        
+        # Mirror the translation across the selected axis.
+        if inMirrorAxis is 0:
+            sourceWorldTranslation.x = sourceWorldTranslation.x * -1
+        elif inMirrorAxis is 1:
+            sourceWorldTranslation.y = sourceWorldTranslation.y * -1        
+        elif inMirrorAxis is 2:
+            sourceWorldTranslation.z = sourceWorldTranslation.z * -1    
+    
+        # Apply the mirrored position back to the target object.
+        MFnTrans = OpenMaya.MFnTransform()
+        targetDagPath = NodeUtility.getDagPath( inTargetObj )
+        MFnTrans.setObject( targetDagPath )
+        MFnTrans.setTranslation( sourceWorldTranslation, OpenMaya.MSpace.kWorld )
+        
+        # Mirror the rotation.
+        baseVectors = {}
+            
+        for row in xrange( 3 ):
+            # We only need the first three rows.
+            rowPtr = sourceRotationMatrix[row]
+            baseVectors[ row ] = []
+            for col in xrange( 3 ):
+                # We only need the first three columns.
+                if col is not inMirrorAxis:
+                    origValue = OpenMaya.MScriptUtil.getDoubleArrayItem( rowPtr, col ) * -1
+                    OpenMaya.MScriptUtil.setDoubleArray( rowPtr, col, origValue )
+    
+        targetInverseMatrix = TransformUtility.getMatrix( inTargetObj, 'parentInverseMatrix' )
+        mirroredTarget = sourceRotationMatrix * targetInverseMatrix
+        toEuler = OpenMaya.MTransformationMatrix( mirroredTarget ).eulerRotation()
+        #x,y,z = map(math.degrees,(toEuler.x,toEuler.y,toEuler.z))
+        #print x,y,z 
+        
+        MFnTrans.setRotation( toEuler )
+
+def mirrorModule():
+    # Mirrors a module.
+    selList = cmds.ls( selection=True, long=True )
+    if len( selList ) == 1:
+        # Prompt for axis.
+        mirrorAxis = int( cmds.layoutDialog( ui=mirrorObjectPrompt ) )
+        
+        inBitObj = selList[0]
+    
+        # Check if selected bit is the root.
+        if NodeUtility.attributeCheck( inBitObj, 'frameRoot' ):
+            # This is the root bit of the module. From here we know we can get the
+            # meta node by accessing the frameRoot attribute.
+            metaNode = NodeUtility.getNodeAttrDestination( inBitObj, 'frameRoot' )[0]
+        else:
+            # The selected bit is not the root. Run through each custom attribute
+            # to find one connected to the meta node.
+            attrList = cmds.listAttr( inBitObj, userDefined=True )
+            for attr in attrList:
+                connection = NodeUtility.getNodeAttrDestination( inBitObj, attr )
+                if NodeUtility.attributeCheck( connection[0], 'metaType' ):
+                    metaNode = connection[0]
+                    break
+                
+        # Now that we have the meta node, we need the XML file name and it's location.
+        metaClassPlug = NodeUtility.getPlug( metaNode, 'metaClass' )
+        metaClassValue = NodeUtility.getPlugValue( metaClassPlug )
+        
+        metaBuildFolderPlug = NodeUtility.getPlug( metaNode, 'buildFolder' )
+        metaBuildFolderValue = NodeUtility.getPlugValue( metaBuildFolderPlug )
+        
+        # Create the target module.
+        targetRootBit = buildFrameModule( metaBuildFolderValue, metaClassValue )
+    
+        # Loop through each object in the source module.
+        metaRootBit = NodeUtility.getNodeAttrSource( metaNode, 'rootBit' )[0]
+        
+        sourceChildBits = getFrameRootAllChildren( metaRootBit )
+        targetChildBits = getFrameRootAllChildren( targetRootBit )
+        
+        sourceBits = []
+        targetBits = []
+        
+        for i,bit in enumerate( sourceChildBits ):
+            sourceBits.append( bit )
+        sourceBits.insert( 0, metaRootBit )
+        
+        for i, bit in enumerate( targetChildBits ):
+            targetBits.append( bit )
+        targetBits.insert( 0, targetRootBit )
+        
+        for bit in xrange( len(sourceBits) ):
+            # Mirror the source onto the target.
+            mirrorObject( inSourceObj=sourceBits[bit], inTargetObj=targetBits[bit], inMirrorAxis=mirrorAxis )
