@@ -113,8 +113,8 @@ def getPlugValue( inPlug ):
     pAttribute = inPlug.attribute()
     apiType = pAttribute.apiType()
     
-    # Float Groups - rotate, translate, scale
-    if apiType in [ OpenMaya.MFn.kAttribute3Double, OpenMaya.MFn.kAttribute3Float ]:
+    # Float Groups - rotate, translate, scale; Compounds
+    if apiType in [ OpenMaya.MFn.kAttribute3Double, OpenMaya.MFn.kAttribute3Float, OpenMaya.MFn.kCompoundAttribute ]:
         result = []
         if inPlug.isCompound():
             for c in xrange( inPlug.numChildren() ):

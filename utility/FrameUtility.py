@@ -62,6 +62,8 @@ def setBitChild( inParent=None, inChild=None ):
             # The parent is the second object.
             child = selList[0]
             parent = selList[1]
+        else:
+            return
     else:
         child = inChild
         parent = inParent

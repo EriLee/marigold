@@ -23,7 +23,7 @@ def createJoint( inJointName, inJointRef, inJointParent=None, inJointRadius=4.0,
     if inPrefix is None:
         jointName = 'j_'+inJointName
     else:
-        jointName = 'j_'+inPrefix+'_'+inJointName
+        jointName = inPrefix+'_'+inJointName
     depFn = OpenMaya.MFnDependencyNode( newJoint )
     depFn.setName( jointName )
         

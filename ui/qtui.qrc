@@ -1,0 +1,26 @@
+<RCC>
+  <qresource prefix="riggingUI">
+    <file>icons/bit_add_child.png</file>
+    <file>icons/bit_box.png</file>
+    <file>icons/bit_cone.png</file>
+    <file>icons/bit_copy_settings.png</file>
+    <file>icons/bit_cylinder.png</file>
+    <file>icons/bit_delete_child.png</file>
+    <file>icons/bit_sphere.png</file>
+    <file>icons/bit_torus.png</file>
+    <file>icons/icon_match_all.png</file>
+    <file>icons/icon_match_rotation.png</file>
+    <file>icons/icon_match_translation.png</file>
+    <file>icons/lock_off.png</file>
+    <file>icons/lock_on.png</file>
+    <file>icons/icon_arm.png</file>
+    <file>icons/icon_foot.png</file>
+    <file>icons/icon_hand.png</file>
+    <file>icons/icon_head.png</file>
+    <file>icons/icon_leg.png</file>
+    <file>icons/icon_root.png</file>
+    <file>icons/icon_spine.png</file>
+    <file>icons/icon_plus16.png</file>
+    <file>icons/icon_plus32.png</file>
+  </qresource>
+</RCC>

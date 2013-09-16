@@ -74,3 +74,22 @@ def matchTransforms( inType ):
         if inType == 'rot' or inType == 'all':            
             childRotation = getMatrixRotation( targetMatrix, 'quat' )
             MFnTrans.setRotation( childRotation, OpenMaya.MSpace.kWorld )
+            
+def matchObjectTransforms( src, cld ):
+    '''
+    Matches the child's translation and rotation to the source object.
+    
+    @param src: String. Name of the source transform object.
+    @param cld: String. Name of the child object.
+    '''
+    # do the matching of child to target
+    MFnTrans = OpenMaya.MFnTransform()
+    childDagPath = NodeUtility.getDagPath( cld )
+    MFnTrans.setObject( childDagPath )
+    targetMatrix = getMatrix( src, 'worldMatrix' )
+    
+    childTranslation = getMatrixTranslation( targetMatrix )
+    MFnTrans.setTranslation( childTranslation, OpenMaya.MSpace.kWorld )
+       
+    childRotation = getMatrixRotation( targetMatrix, 'quat' )
+    MFnTrans.setRotation( childRotation, OpenMaya.MSpace.kWorld )
