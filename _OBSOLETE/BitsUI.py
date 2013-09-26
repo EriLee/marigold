@@ -3,7 +3,6 @@ import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 import marigold.utility.TransformUtility as TransformUtility
 import marigold.utility.NodeUtility as NodeUtility
-import marigold.utility.FrameUtility as FrameUtility
 import marigold.ui.deleteAttrUI as deleteAttrUI
 import xml.etree.ElementTree as ET
 import marigold.utility.XMLUtility as XMLUtility
@@ -103,9 +102,9 @@ class createBitsUI():
         cmds.text( label='General Tools', width=self.winWidth, wordWrap=True, align='center', font='boldLabelFont', backgroundColor=(0.15,0.15,0.15) )
         cmds.separator( style='none', height=4 )
         self.childRow = cmds.rowColumnLayout( numberOfColumns=2 )
-        cmds.button( label='Add Child', command=lambda b: FrameUtility.setBitChild() )
-        cmds.button( label='Remove Child', command=lambda b: FrameUtility.deleteBitChild() )
-        cmds.button( label='Copy Settings', command=lambda b: FrameUtility.copyBitSettings() )
+        cmds.button( label='Add Child', command=lambda b: NodeUtility.setBitChild() )
+        cmds.button( label='Remove Child', command=lambda b: NodeUtility.deleteBitChild() )
+        cmds.button( label='Copy Settings', command=lambda b: NodeUtility.copyBitSettings() )
         cmds.setParent( '..' )#self.childRow
         cmds.setParent( '..' )#self.childCol
         

@@ -92,6 +92,89 @@ def getDagPath( inObjName ):
     selList.getDagPath( 0, mDagPath )
     return mDagPath
 
+def isValidMPlug( inObj ):
+    '''
+    Checks to see if the passed in object is an instance of MPlug.
+    
+    @param inObj: Maya object.
+    @return: Bool.
+    '''
+    if isinstance( inObj, OpenMaya.MPlug ):
+        return True
+    else:
+        return False
+
+def addPlug( inBit, inPlugName, inAttrType, inAttrDataType ):
+    '''
+    Adds a plug to the frame bit.
+    
+    @param inBit: String. Name of the bit to add the attribute to.
+    @param inPlugName: String. Name of the plug to add.
+    @param inAttrType: String. Type of attribute to add.
+    @param inAttrDataType: String. The attribute data type.
+    '''
+    if inAttrType == 'attributeType':
+        if inAttrDataType == 'float3':
+            cmds.addAttr( inBit, longName=inPlugName, attributeType=inAttrDataType )
+            cmds.addAttr( longName='{0}X'.format( inPlugName ), attributeType='float', parent=inPlugName )
+            cmds.addAttr( longName='{0}Y'.format( inPlugName ), attributeType='float', parent=inPlugName )
+            cmds.addAttr( longName='{0}Z'.format( inPlugName ), attributeType='float', parent=inPlugName )
+        else:
+            cmds.addAttr( inBit, longName=inPlugName, attributeType=inAttrDataType )
+    elif inAttrType == 'dataType':
+        if inAttrDataType == 'typed':
+            # Make it a string.
+            inAttrDataType = 'string'
+        cmds.addAttr( inBit, longName=inPlugName, dataType=inAttrDataType )
+    elif inAttrType == 'matrixType':
+        mObj = getDependNode( inBit )
+        dgModifier = OpenMaya.MDGModifier()
+        mAttr = OpenMaya.MFnMatrixAttribute()
+        controlMatrix = mAttr.create( inPlugName, inPlugName, OpenMaya.MFnMatrixAttribute.kDouble )
+        dgModifier.addAttribute( mObj, controlMatrix )
+        dgModifier.doIt()
+
+def convertAttrString( inAttrDataType, inValue ):
+    '''
+    Converts a string into the appropriate type.
+     
+    @param inAttrDataType: String. The attribute data type.
+    @param inValue: String. Value to convert.
+    @return: Correct value.
+    '''
+    if inAttrDataType in [ 'long', 'enum', 'byte' ]:
+        return int( inValue )
+    elif inAttrDataType in [ 'doubleLinear', 'float', 'double' ]:
+        return float( inValue )
+    elif inAttrDataType == 'string':
+        return str( inValue )
+    elif inAttrDataType == 'bool':
+        return bool( inValue )
+    elif inAttrDataType == None:
+        # This is kinda funky, but the position and rotation return no attribute data types.
+        # So the function that gathers that data for writing the XML file fills in None.
+        return float( inValue )
+    
+def setPlug( inBit, inPlugName, inPlugValue, inAttrDataType=None ):
+    '''
+    Sets the value of the plug.
+    
+    @param inBit: String. Name of the bit with the plug.
+    @param inPlugName: String. Name of the plug to add.
+    @param inPlugValue: String. The value of the plug.
+    @param inAttrDataType: String. The attribute data type.
+    '''
+    lockState = cmds.getAttr( '{0}.{1}'.format( inBit, inPlugName), lock=True )
+    if lockState is False and inPlugValue != 'None':
+        # Convert the value.
+        newValue = convertAttrString( inAttrDataType, inPlugValue )
+        if inAttrDataType == 'string':
+            # It's a string so...
+            cmds.setAttr( '{0}.{1}'.format( inBit, inPlugName ), newValue, type='string', lock=False )
+        else:
+            # Everything else is a number!
+            cmds.setAttr( '{0}.{1}'.format( inBit, inPlugName ), newValue, lock=False )
+               
 def getPlug( inObj, inPlugName ):
     '''
     @param inObj: String.
@@ -140,6 +223,11 @@ def getPlugValue( inPlug ):
         # String
         elif pType == OpenMaya.MFnData.kString:
             return inPlug.asString()
+        
+    # MATRIX
+    elif apiType == OpenMaya.MFn.kMatrixAttribute:
+        return OpenMaya.MFnMatrixData( inPlug.asMObject() ).matrix()
+    
     # NUMBERS
     elif apiType == OpenMaya.MFn.kNumericAttribute:
         pType = OpenMaya.MFnNumericAttribute( pAttribute ).unitType()
@@ -198,13 +286,54 @@ def setPlugValue( inPlug, inValue ):
     elif apiType == OpenMaya.MFn.kTypedAttribute:
         pType = OpenMaya.MFnTypedAttribute( pAttribute ).attrType()
         if pType == OpenMaya.MFnData.kMatrix:
-            OpenMaya.MGlobal.displayError( 'Matrix setting hasn\'t been setup yet.' )
-            return OpenMaya.MFnMatrixData( inPlug.asMObject() ).matrix()
+            #OpenMaya.MGlobal.displayError( 'Matrix setting hasn\'t been setup yet.' )
+            #return OpenMaya.MFnMatrixData( inPlug.asMObject() ).matrix()
+            if isValidMPlug(inValue):
+                # inValue must be a MPlug!
+                '''
+                sourceValueAsMObject = OpenMaya.MFnMatrixData( inValue.asMObject() ).object()
+                blarg = TransformUtility.getMatrixTranslation( OpenMaya.MFnMatrixData( inValue.asMObject() ).matrix() )
+                print 'blarg: {0},{1},{2}'.format( blarg.x,blarg.y,blarg.z )
+                
+                tlarg = TransformUtility.getMatrixTranslation( OpenMaya.MFnMatrixData( inPlug.asMObject() ).matrix() )
+                print 'tlarg: {0},{1},{2}'.format( tlarg.x,tlarg.y,tlarg.z )
+                
+                print 'sourceValueAsMObject: {0}'.format( sourceValueAsMObject )
+                #inPlug.setMObject( sourceValueAsMObject )
+                dgModifier = OpenMaya.MDGModifier()
+                dgModifier.newPlugValue( inPlug, sourceValueAsMObject )
+                dgModifier.doIt()
+                '''
+                
+                '''
+                MFnTrans = OpenMaya.MFnTransform()
+                MFnTrans.setObject( inPlug.asMObject() )
+                newMatrix = OpenMaya.MFnMatrixData( inPlug.asMObject() ).matrix()
+                transMatrix = OpenMaya.MTransformationMatrix( newMatrix ).asMatrix()
+                MFnTrans.set( transMatrix )
+                '''
+                pass
+            else:
+                plugNode = inPlug.node()
+                
+                MFnTrans = OpenMaya.MFnTransform( plugNode )
+                
+                sourceMatrix = OpenMaya.MTransformationMatrix( inValue )#.asMatrix()
+                MFnTrans.set( sourceMatrix )
         
         # String
         elif pType == OpenMaya.MFnData.kString:
             value = inValue
             inPlug.setString( value )
+    
+    # MATRIX
+    elif apiType == OpenMaya.MFn.kMatrixAttribute:
+        if isValidMPlug(inValue):
+            # inValue must be a MPlug!
+            sourceValueAsMObject = OpenMaya.MFnMatrixData( inValue.asMObject() ).object()
+            inPlug.setMObject( sourceValueAsMObject )
+        else:
+            OpenMaya.MGlobal.displayError( 'Value object is not an MPlug. To set a MMatrix value, both passed in variables must be MPlugs.' )
     
     # Numbers
     elif apiType == OpenMaya.MFn.kNumericAttribute:
@@ -248,3 +377,185 @@ def getMetaNodesInScene( inNodeType=None ):
             else:
                 nodeList.append( node )
     return nodeList
+
+def getFrameBitSettings( inFrameBit ):
+    '''
+    Retrieves the settings for the frame bit.
+    
+    @param inFrameBit: String. Name of frame bit.
+    @return: Dictionary. All the custom attributes on the frame bit.
+    '''    
+    attrList = cmds.listAttr( inFrameBit, userDefined=True )
+    if attrList is not None:
+        tempDict = {}
+        for attr in attrList:
+            plug = getPlug( inFrameBit, attr )
+            plugValue = getPlugValue( plug )
+            tempDict[ attr ] = plugValue
+    else:
+        tempDict = None
+    return tempDict
+
+def copyBitSettings():
+    '''
+    Copies the bit shape settings (OpenGL stuff) from the second object to the
+    first (in selection order).
+    '''
+    selList = cmds.ls( selection=True, long=True )
+    depFn = OpenMaya.MFnDependencyNode()
+    
+    if len(selList) == 2:
+        # First object is target.
+        targetShape = cmds.listRelatives( selList[0], shapes=True, fullPath=True )[0]
+        targetShapeMObj = getDependNode( targetShape )
+        depFn.setObject( targetShapeMObj )
+        targetShapeType = depFn.typeName()
+        
+        # Second object is source.
+        sourceShape = cmds.listRelatives( selList[1], shapes=True, fullPath=True )[0]
+        sourceShapeMObj = getDependNode( sourceShape )
+        depFn.setObject( sourceShapeMObj )
+        sourceShapeType = depFn.typeName()
+        
+        if targetShapeType == sourceShapeType:        
+            # The types match. Do the copy of attribute settings.
+            for attr in cmds.listAttr( sourceShape, multi=True, keyable=True ):
+                # Get the plugs.
+                sourcePlug = getPlug( sourceShape, attr )
+                targetPlug = getPlug( targetShape, attr )
+                
+                # Get the source plug value.
+                sourcePlugValue = getPlugValue( sourcePlug )
+                
+                # Set the target's plug value.
+                setPlugValue( targetPlug, sourcePlugValue )
+        else:
+            raise ValueError( '{0} and {1} do not match.'.format( selList[0], selList[1] ) )
+    
+def setBitChild( inParent=None, inChild=None ):
+    '''
+    Connects the child object's matrix plug to the parent object's
+    targetWorldMatrix array plug. This plug's data is used by the parent's
+    draw() to render the hierarchy arrows.
+    
+    @param inParent: String. Name of the parent object.
+    @param inChild: String. Name of the child object.
+    '''
+    if inParent is None or inChild is None:
+        # Get selection and return the longnames of the objects.
+        selList = cmds.ls( selection=True, long=True )
+        if len(selList) is 2:
+            # The child is the first object.
+            # The parent is the second object.
+            child = selList[0]
+            parent = selList[1]
+        else:
+            return
+    else:
+        child = inChild
+        parent = inParent
+            
+    # Get the parent shape's child matrix attribute.
+    pShape = cmds.listRelatives( parent, type='shape', allDescendents=False )[0]
+    shapeName = '{0}|{1}'.format( parent, pShape )
+    parentChildPlug = getPlug( shapeName, 'targetWorldMatrix' )
+    
+    # This will connect the first time attempted.
+    attrName = 'targetWorldMatrix[{0}]'.format( parentChildPlug.numElements() )
+    fullParent = '{0}.{1}'.format( shapeName, attrName )
+    fullChild = '{0}.matrix'.format( child )
+    cmds.connectAttr( fullChild, fullParent, force=True )
+    
+    # Do any parenting now.
+    # Get the child's current parent.
+    childParent = cmds.listRelatives( child, parent=True, fullPath=True )
+    if childParent is None:
+        # Child object has no parent. Do parenting.
+        cmds.parent( child, parent )
+    else:
+        if childParent[0] != parent:
+            # Has different parent currently. Do parenting
+            cmds.parent( child, parent )
+        
+def deleteBitChild():
+    # Disconnected the child from it's parent.
+    selList = cmds.ls( selection=True, long=True )
+    for i in selList:
+        connections = getNodeAttrDestination( i, 'matrix' )
+        parent = '{0}.{1}'.format( connections[0], connections[1] )
+        for plug in connections:
+            if plug.find( 'targetWorldMatrix' ) is not -1:
+                cmds.removeMultiInstance( parent, b=True )
+        cmds.parent( i, world=True )
+        
+def getFrameRootAllChildren( inFrameRootName ):
+    '''
+    Gets all descendants of a frame root.
+    
+    @param inFrameRootName: String. Name of frame root object.
+    @return: List of children. Ordered from highest to lowest in the hierarchy.
+    '''
+    children = cmds.listRelatives( inFrameRootName, type='transform', allDescendents=True, fullPath=True )
+    tempList = []
+    if children is not None:
+        for child in children:
+            tempList.insert( 0, child )
+    else:
+        tempList = None
+    return tempList
+
+def cleanParentFullName( inBitName ):
+    '''
+    Removes the first | and the group name from a bit's parent's full path name.
+    
+    @param inBitName: String. Name of the bit to get the parent full path name.
+    @return: String. Cleaned up parent full path name.
+    '''
+    parent = cmds.listRelatives( inBitName, parent=True, fullPath=True )
+    if parent == None:
+        retParent = 'None'
+    else:
+        retParent = parent[0]
+    return retParent
+
+def getAttrTypes( inNode, inAttr ):
+    '''
+    Gets the attribute's attr type and data type. These are needed for adding attributes
+    to a node.
+    
+    @param inNode: String. Name of node.
+    @param inAttr: String. Name of attribute.
+    @return: List. Attribute Type and Attribute Data Type.
+    '''
+    attrString = '{0}.{1}'.format( inNode, inAttr )
+    attrDataType = cmds.getAttr( attrString, type=True )
+    
+    if attrDataType in [ 'string', 'matrix', 'TdataCompound' ]: attrType = 'dataType'
+    elif attrDataType in [ 'long', 'double', 'bool', 'enum', 'doubleLinear', 'float', 'byte', 'message' ]: attrType = 'attributeType'
+    # Certain attributes we don't want. So I pass a False flag which signals other functions
+    # to skip the attribute.
+    else: attrType = False
+    return [ attrType, attrDataType ]
+
+def getModuleComponentSettings( inModuleBit ):
+    '''
+    Gets an object's component settings.
+    
+    @param inModuleBit: String. Name of the bit from which to get the components.
+    @return: List. List of components.
+    '''
+    attrList = cmds.listAttr( inModuleBit, userDefined=True )
+    returnList = []
+    
+    for attrName in attrList:
+        # The attributes come in order from top to bottom.
+        # They also are recursive. So we use that to our advantage.
+        # We only need the attribute names that are used by code.
+        # Any attribute that is just a container for other attributes can be skipped.
+        attrChildren = cmds.attributeQuery( attrName, node=inModuleBit, listChildren=True )
+        
+        if attrChildren is None:
+            # Single attribute.
+            returnList.append( attrName )
+        
+    return returnList

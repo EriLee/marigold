@@ -12,12 +12,6 @@ from shiboken import wrapInstance
 
 import maya.cmds as cmds
 import maya.OpenMayaUI as omui
-import marigold.utility.TransformUtility as TransformUtility
-import marigold.utility.FrameUtility as FrameUtility
-import marigold.utility.NodeUtility as NodeUtility
-import marigold.utility.XMLUtility as XMLUtility
-
-import marigold.components as Components
 
 import marigold.ui.test_widget as test_widget
 
@@ -53,6 +47,7 @@ class ExtendedQLabel(QtGui.QLabel):
         
 class UIRiggingMain( QtGui.QDialog ):
     SCRIPT_JOB_NUMBER = -1
+    SELECTED_ITEM = None
     
     def __init__( self, parent=maya_main_window() ):
         super( UIRiggingMain, self ).__init__( parent )
@@ -138,12 +133,185 @@ class UIRiggingMain( QtGui.QDialog ):
             #sender.setStyleSheet( 'background-color:#616161' )
     
     def build_character_gui( self ):
-        print 'BUILD CHARACTER GUI'
-   
+        propertyStack = QtGui.QVBoxLayout( self )
+        dropList = DropList()
+        self.sub_layout.addWidget( dropList )
+        
+        modules = getModulesByPriority()
+        y = 6
+        for module in modules:
+            print module
+            moduleLabel = '{0}: {1}'.format( module[0], str(module[1]) )
+            dropList.addItem( moduleLabel )
+            
+        setOrderBtn = QtGui.QPushButton()
+        setOrderBtn.setText( 'Set Priority' )
+        setOrderBtn.clicked.connect( lambda a=dropList:self.getListWidgetItems( a ) )
+        
+        self.sub_layout.addWidget( setOrderBtn )
+            
+    def getListWidgetItems( self, listWidget ):
+        itemList = []
+        for i in xrange( listWidget.count() ):
+            item = listWidget.item( i )
+            itemList.append( item.text() )
+        print itemList
+        return itemList
+
+class DropList( QtGui.QListWidget ):
+    MIME_TYPE = 'application/x-qabstractitemmodeldatalist'
+    
+    def __init__( self, parent=None ):
+        super( DropList, self ).__init__()
+        
+        self.parent = parent
+        
+        self.setStyleSheet('''
+            color:black;
+            background-color:lightgray;
+            border-width:2px;
+            border-style:solid;
+            border-color:black;
+            margin: 2px;''' )
+        
+        self.setAcceptDrops( True )
+        self.setDragEnabled( True )
+        self.setDragDropMode( QtGui.QAbstractItemView.InternalMove )
+    
+    def dropEvent( self, event ):
+        super( DropList, self ).dropEvent( event )
+
+        mimeData = event.mimeData()
+
+        for item in self.selectedItems():
+            print item.text()
+            
+        
+
+
+
+
+
+
+
+class DropFrame( QtGui.QFrame ):
+    def __init__( self, parent=None ):
+        super( DropFrame, self ).__init__( parent )
+        
+        self.setStyleSheet('''
+            background-color:lightgray;
+            border-width:2px;
+            border-style:solid;
+            border-color:black;
+            margin: 2px;''' )
+            
+        self.setAcceptDrops( True )
+        
+    def dragEnterEvent( self, event ):
+        print 'drag event: {0}'.format( event )
+        
+    def dropEvent( self, event ):
+        print 'drop event: {0}'.format( event )
+
+class DragLabel( QtGui.QLabel ):
+    def __init__( self, parent=None ):
+        super( DragLabel, self ).__init__( parent )
+
+        self.setStyleSheet('''
+            background-color: black;
+            color: white;
+            font: bold;
+            padding: 6px;
+            border-width: 2px;
+            border-style: solid;
+            border-radius: 16px;
+            border-color: white;''')
+
+    def mousePressEvent( self, event ):
+        print 'mouse press event: {0}'.format( event )
+    
+import marigold.utility.NodeUtility as NodeUtility
+def getModulesInScenes():
+    '''
+    Finds all module roots in the active scene.
+    '''
+    nodes = cmds.ls( type='network' )
+    nodeList = []
+    for node in nodes:
+        if NodeUtility.attributeCheck( node, 'characterRoot' ):
+            aType = cmds.getAttr( '{0}.classType'.format( node ) )
+            if aType == 'ModuleRootComponent':
+                nodeList.append( node )
+    return nodeList
+
+def sortModules( inModules, inOrder='ascending', renumber=True ):
+    '''
+    Sorts module roots by priority.
+    
+    @param inModules: Dict. Dict of modulename:priorty.
+    @param inOrder: String. Ascending or descending.
+    '''
+    from operator import itemgetter
+    
+    if inOrder == 'ascending':
+        sortedModules = sorted( inModules.iteritems(), key=itemgetter(1) )
+    elif inOrder == 'descending':
+        sortedModules = sorted( inModules.iteritems(), key=itemgetter(1), reverse=True )
+        
+    if renumber:
+        for index, item in enumerate( sortedModules ):
+            sortedModules[index] = [ item[0], index ]
+    return sortedModules
+
+def getModulePriorities( inModules ):
+    '''
+    Gets all the priorities for a list of module roots.
+    
+    @param inModules: List. List of module roots.
+    '''
+    modulesDict = {}
+    for item in inModules:
+        plug = NodeUtility.getPlug( item, 'buildPriority' )
+        plugValue = NodeUtility.getPlugValue( plug )
+        modulesDict[item] = plugValue
+    return modulesDict
+
+def getModulesByPriority( inOrder='ascending' ):
+    '''
+    Gets modules in a scene based on their priority.
+    
+    @param inOrder: String. Ascending or descending.
+    '''
+    modules = getModulesInScenes()
+    modulesWithPriority = getModulePriorities( modules )
+    return sortModules( modulesWithPriority, inOrder )
+
+def getModuleName( inNodeName ):
+    '''
+    Gets a module name from it's node name.
+    
+    @param inNodeName: String. Name of a module root node.
+    '''
+    plug = NodeUtility.getPlug( inNodeName, 'moduleName' )
+    plugValue = NodeUtility.getPlugValue( plug )
+    return plugValue
+
+def getModulePriority( inNodeName ):
+    plug = NodeUtility.getPlug( inNodeName, 'buildPriority' )
+    plugValue = NodeUtility.getPlugValue( plug )
+    return plugValue
+
+
+
+
+
 
 class UICharacterTools( QtGui.QWidget ):        
     def __init__( self ):
         super( UICharacterTools, self ).__init__()
+
+
+
         
 '''
     RUN THE WINDOW

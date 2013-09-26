@@ -1,13 +1,14 @@
 import sys, types
 import maya.cmds as cmds
 import marigold.utility.NodeUtility as NodeUtility
-import marigold.utility.FrameUtility as FrameUtility
 
 # IMPORT COMPONENTS
 #from BaseComponent import BaseComponent
 from joints.BasicJoint import BasicJointComponent
 from controls.GLBoxControl import GLBoxControlComponent
 from controls.CurveControl import CurveControlComponent
+from roots.ModuleRoot import ModuleRootComponent
+from roots.CharacterRoot import CharacterRootComponent
 
 def str_to_class( field ):
     '''
@@ -23,12 +24,26 @@ def str_to_class( field ):
         return identifier
     raise TypeError("%s is not a class." % field)
 
+def findComponent( inObjectName, inComponentType ):
+    '''
+    Searches a given object for a component that matches the passed in type.
+    
+    @param inObjectName: String. Name of object.
+    @param inComponentType: String. Name of component class.
+    '''
+    objComponents = getComponents( inObjectName )
+    compMatch = None
+    for comp in objComponents:
+        if comp == inComponentType:
+            compMatch = comp
+    return compMatch
+
 def getComponents( inObj ):
     '''
     Creates the components GUI.
-    '''
+    '''    
     if inObj is not None:
-        components_list = FrameUtility.getFrameBitSettings( inObj )
+        components_list = NodeUtility.getFrameBitSettings( inObj )
     else:
         components_list = None
     
@@ -45,36 +60,67 @@ def getComponents( inObj ):
             if metaNode:
                 # It has a meta node.
                 # Get the meta node properties. This returns a dict.
-                meta_properties = FrameUtility.getFrameBitSettings( metaNode[0] )
+                meta_properties = NodeUtility.getFrameBitSettings( metaNode[0] )
                 component_class = meta_properties[ 'classType' ]
                 # test hack!!!
                 components_class_list[ node_name ] = component_class
         return components_class_list
     else:
         return None
-    
+
 def metaNodeCheck( inObj, inComponents ):
     '''
     Checks if the component plug of an object has a meta node connected.
     @param inObj: String. Name of the selected object.
     @param inComponents: List of connected components to the selected object.
-    '''
+    '''    
     for comName in inComponents:
         metaNode = NodeUtility.getNodeAttrDestination( inObj, comName )
         if metaNode:
             return True
     return False
 
-def addComponentToObject( inClassType, **kwargs ):
-    selList = cmds.ls( selection=True, long=True )
-    if len( selList ) is 1:
-        prevSel = selList[0]
+def addComponentToObject( inClassType, **kwargs ):    
+    if kwargs.has_key('inObject'):
+        targetObj = kwargs['inObject']
+        print 'targetObj: {0}'.format( targetObj )
+        del kwargs['inObject']
+        prevSel = None
+    else:
+        selList = cmds.ls( selection=True, long=True )
+        if len( selList ) is 1:
+            targetObj = selList[0]
+            prevSel = selList[0]
+    
+    if targetObj is not None:
         component_class = str_to_class( inClassType )
         newNode = component_class.createCompNode( inClassType, **kwargs )
         
         # Add the component attribute to the object.
-        FrameUtility.addPlug( selList[0], newNode.name(), 'attributeType', 'message' )
+        NodeUtility.addPlug( targetObj, newNode.name(), 'attributeType', 'message' )
         nodePlug = '{0}.parentName'.format( newNode.name() )
-        objectPlug = '{0}.{1}'.format( selList[0], newNode.name() )
+        objectPlug = '{0}.{1}'.format( targetObj, newNode.name() )
         NodeUtility.connectPlugs( objectPlug, nodePlug )
-        cmds.select( prevSel )
+        if prevSel is not None:
+            cmds.select( prevSel )
+            
+        return newNode
+    
+def searchModule( inObjectName, inComponentType ):
+    '''
+    Recursively searches a module for the component that matches the passed in type.
+    This is an upward search.
+    
+    @param inObjectName: String. Name of object.
+    @param inComponentType: String. Name of component class.
+    @return: List. Name of object with the module meta component and the name of the meta
+                    component node.
+    '''    
+    objSearch = findComponent( inObjectName, inComponentType )
+    
+    if objSearch is not None:
+        return inObjectName, objSearch
+    
+    if objSearch is None:
+        objParent = cmds.listRelatives( inObjectName, parent=True, fullPath=True )
+        return searchModule( objParent[0], inComponentType )

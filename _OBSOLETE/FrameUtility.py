@@ -1,13 +1,55 @@
 import math
 import os
-import sys
 import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 import marigold.utility.NodeUtility as NodeUtility
 import marigold.utility.TransformUtility as TransformUtility
 import marigold.utility.XMLUtility as XMLUtility
-import marigold.utility.GeneralUtility as GeneralUtility
-import marigold.meta.metaNode as metaNode
+
+
+def searchModule( inObjectName, inComponentType ):
+    '''
+    Recursively searches a module for the component that matches the passed in type.
+    This is an upward search.
+    
+    @param inObjectName: String. Name of object.
+    @param inComponentType: String. Name of component class.
+    @return: List. Name of object with the module meta component and the name of the meta
+                    component node.
+    '''
+    from marigold.components import findComponent
+    
+    objSearch = findComponent( inObjectName, inComponentType )
+    
+    if objSearch is not None:
+        return inObjectName, objSearch
+    
+    if objSearch is None:
+        objParent = cmds.listRelatives( inObjectName, parent=True, fullPath=True )
+        return searchModule( objParent[0], inComponentType )
+
+def getModuleComponentSettings( inModuleBit ):
+    '''
+    Gets an object's component settings.
+    
+    @param inModuleBit: String. Name of the bit from which to get the components.
+    @return: List. List of components.
+    '''
+    attrList = cmds.listAttr( inModuleBit, userDefined=True )
+    returnList = []
+    
+    for attrName in attrList:
+        # The attributes come in order from top to bottom.
+        # They also are recursive. So we use that to our advantage.
+        # We only need the attribute names that are used by code.
+        # Any attribute that is just a container for other attributes can be skipped.
+        attrChildren = cmds.attributeQuery( attrName, node=inModuleBit, listChildren=True )
+        
+        if attrChildren is None:
+            # Single attribute.
+            returnList.append( attrName )
+        
+    return returnList
 
 def copyBitSettings():
     '''
@@ -111,12 +153,25 @@ def addPlug( inBit, inPlugName, inAttrType, inAttrDataType ):
     @param inAttrDataType: String. The attribute data type.
     '''
     if inAttrType == 'attributeType':
-        cmds.addAttr( inBit, longName=inPlugName, attributeType=inAttrDataType )
-    else:
+        if inAttrDataType == 'float3':
+            cmds.addAttr( inBit, longName=inPlugName, attributeType=inAttrDataType )
+            cmds.addAttr( longName='{0}X'.format( inPlugName ), attributeType='float', parent=inPlugName )
+            cmds.addAttr( longName='{0}Y'.format( inPlugName ), attributeType='float', parent=inPlugName )
+            cmds.addAttr( longName='{0}Z'.format( inPlugName ), attributeType='float', parent=inPlugName )
+        else:
+            cmds.addAttr( inBit, longName=inPlugName, attributeType=inAttrDataType )
+    elif inAttrType == 'dataType':
         if inAttrDataType == 'typed':
             # Make it a string.
             inAttrDataType = 'string'
         cmds.addAttr( inBit, longName=inPlugName, dataType=inAttrDataType )
+    elif inAttrType == 'matrixType':
+        mObj = NodeUtility.getDependNode( inBit )
+        dgModifier = OpenMaya.MDGModifier()
+        mAttr = OpenMaya.MFnMatrixAttribute()
+        controlMatrix = mAttr.create( inPlugName, inPlugName, OpenMaya.MFnMatrixAttribute.kDouble )
+        dgModifier.addAttribute( mObj, controlMatrix )
+        dgModifier.doIt()
 
 def setPlug( inBit, inPlugName, inPlugValue, inAttrDataType=None ):
     '''
@@ -146,7 +201,7 @@ def convertAttrString( inAttrDataType, inValue ):
     @param inValue: String. Value to convert.
     @return: Correct value.
     '''
-    if inAttrDataType in [ 'long', 'enum' ]:
+    if inAttrDataType in [ 'long', 'enum', 'byte' ]:
         return int( inValue )
     elif inAttrDataType in [ 'doubleLinear', 'float', 'double' ]:
         return float( inValue )
@@ -354,7 +409,7 @@ def createFrameModuleXML():
                                                                                                           NodeUtility.getPlugValue( plug ) ) )
     
     wmRootBit = TransformUtility.getMatrix( rootBit[0], 'matrix' )
-    pos = TransformUtility.getMatrixTranslation( wmRootBit )
+    pos = TransformUtility.getMatrixTranslation( wmRootBit, OpenMaya.MFn.kWorld )
     rot = TransformUtility.getMatrixRotation( wmRootBit, 'eulerVector' )
     xmlList.append( '\t\t<plug name=\"translateX\">{0}</plug>'.format( pos.x ) )
     xmlList.append( '\t\t<plug name=\"translateY\">{0}</plug>'.format( pos.y ) )
@@ -430,7 +485,7 @@ def createFrameModuleXML():
         
         # Get the position and rotation.
         wmBit = TransformUtility.getMatrix( child, 'matrix' )
-        pos = TransformUtility.getMatrixTranslation( wmBit )
+        pos = TransformUtility.getMatrixTranslation( wmBit, OpenMaya.MFn.kWorld )
         rot = TransformUtility.getMatrixRotation( wmBit, 'eulerVector' )
         
         xmlList.append( '\t\t<plug name=\"translateX\">{0}</plug>'.format( pos.x ) )
@@ -557,6 +612,8 @@ def readFrameModuleXML( inFile=None, inCallScript=False ):
         return returnDict
 
 def buildFrameModule( inDir=None, inXMLFile=None ):
+    from marigold.meta.metaNode import MetaNode
+    
     # Get the XML settings for the frame module.
     dirPath = XMLUtility.getPresetPath( XMLUtility.FRAME_PRESETS_PATH+inDir )
     fullPath = dirPath+'/'+inXMLFile+'.xml'
@@ -569,7 +626,7 @@ def buildFrameModule( inDir=None, inXMLFile=None ):
     metaType = metanode['metaType']
     metaClass = metanode['metaClass']
     
-    metanode = metaNode.MetaNode( inNodeName=meta, inNodeMetaType=metaType )
+    metanode = MetaNode( inNodeName=meta, inNodeMetaType=metaType )
     metanode = cmds.ls( selection=True )[0]
     
     metaPlugs = xmlDict['metanode']['plugs']
@@ -698,7 +755,7 @@ def mirrorObject( inSourceObj=None, inTargetObj=None, inMirrorAxis=None ):
         sourceWorldMatrix = TransformUtility.getMatrix( inSourceObj, 'worldMatrix' )
         
         # Get the source's translation vector.
-        sourceWorldTranslation = TransformUtility.getMatrixTranslation( sourceWorldMatrix )
+        sourceWorldTranslation = TransformUtility.getMatrixTranslation( sourceWorldMatrix, OpenMaya.MFn.kWorld )
         
         # Get the source's rotation matrix.
         sourceRotationMatrix = OpenMaya.MTransformationMatrix( sourceWorldMatrix ).asRotateMatrix()

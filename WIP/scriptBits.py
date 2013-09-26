@@ -61,7 +61,7 @@ def createJointOLD( inBit, inParent=None, inJointRadius=4.0 ):
         # TODO
         
         # Set position.
-        bitWorldTranslationVector = TransformUtility.getMatrixTranslation( bitWorldMatrix )
+        bitWorldTranslationVector = TransformUtility.getMatrixTranslation( bitWorldMatrix, OpenMaya.MFn.kWorld )
         if parentDepNode.name() == 'world':
             # If the joint's parent is the world, then we take the translation vector straight
             # from the frame bit's world matrix.
@@ -71,7 +71,7 @@ def createJointOLD( inBit, inParent=None, inJointRadius=4.0 ):
             # matrix and use it as a change of basis for the frame bit's world matrix.
             parentMatrix = TransformUtility.getMatrix( parentDepNode.name(), 'worldMatrix' )
             basisMatrix = bitWorldMatrix * parentMatrix.inverse()            
-            jointVector = TransformUtility.getMatrixTranslation( basisMatrix )
+            jointVector = TransformUtility.getMatrixTranslation( basisMatrix, OpenMaya.MFn.kWorld )
         jointFn.setTranslation( jointVector, OpenMaya.MSpace.kTransform )
         
         # Set rotation order.

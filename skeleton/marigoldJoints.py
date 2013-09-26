@@ -21,7 +21,7 @@ def createJoint( inJointName, inJointRef, inJointParent=None, inJointRadius=4.0,
         
     # Name the joint.
     if inPrefix is None:
-        jointName = 'j_'+inJointName
+        jointName = inJointName
     else:
         jointName = inPrefix+'_'+inJointName
     depFn = OpenMaya.MFnDependencyNode( newJoint )
@@ -46,18 +46,20 @@ def createJoint( inJointName, inJointRef, inJointParent=None, inJointRadius=4.0,
         jointFn.setOrientation( bitEuler )
     
     # Set position.
-    bitWorldTranslationVector = TransformUtility.getMatrixTranslation( bitWorldMatrix )
+    bitWorldTranslationVector = TransformUtility.getMatrixTranslation( bitWorldMatrix, OpenMaya.MSpace.kWorld )
     if parentDepNode.name() == 'world':
         # If the joint's parent is the world, then we take the translation vector straight
         # from the frame bit's world matrix.
         jointVector = bitWorldTranslationVector
+        space = OpenMaya.MSpace.kTransform
     else:
         # If the joint's parent is another joint, then we need to get the parent's world
         # matrix and use it as a change of basis for the frame bit's world matrix.
         parentMatrix = TransformUtility.getMatrix( parentDepNode.name(), 'worldMatrix' )
         basisMatrix = bitWorldMatrix * parentMatrix.inverse()            
-        jointVector = TransformUtility.getMatrixTranslation( basisMatrix )
-    jointFn.setTranslation( jointVector, OpenMaya.MSpace.kTransform )
+        jointVector = TransformUtility.getMatrixTranslation( basisMatrix, OpenMaya.MSpace.kWorld )
+        space = OpenMaya.MSpace.kWorld
+    jointFn.setTranslation( jointVector, space )
     
     # Set rotation order.
     # TODO

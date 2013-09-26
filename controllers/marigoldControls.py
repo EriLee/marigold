@@ -2,7 +2,6 @@ import maya.cmds as cmds
 import maya.OpenMaya as OpenMaya
 import marigold.utility.TransformUtility as TransformUtility
 import marigold.utility.NodeUtility as NodeUtility
-import marigold.utility.FrameUtility as FrameUtility
 import marigold.controllers.glBox as glBox
 
 class makeControl():
@@ -39,7 +38,7 @@ class makeControl():
             MFnTrans.setObject( groupDagPath )
             
             # Apply the targets translation to the group.
-            targetTranslation = TransformUtility.getMatrixTranslation( targetMatrix )
+            targetTranslation = TransformUtility.getMatrixTranslation( targetMatrix, OpenMaya.MFn.kWorld )
             MFnTrans.setTranslation( targetTranslation, OpenMaya.MSpace.kWorld )
             
             # Apply the targets rotation to the group.         
@@ -50,7 +49,7 @@ class makeControl():
             if inDoParent:
                 parent = cmds.listRelatives( inBitName, parent=True )
                 if NodeUtility.attributeCheck( parent[0], 'controlName' ):
-                    parentControl = FrameUtility.getFrameBitSettings( parent[0] )[ 'controlName' ]
+                    parentControl = NodeUtility.getFrameBitSettings( parent[0] )[ 'controlName' ]
                     cmds.parent( newGroup, 'ct_'+parentControl, absolute=True )
                     
         return newGroup

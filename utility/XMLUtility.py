@@ -6,14 +6,17 @@ TODO:
 2. Read XML file.
 3. UI for saving/rewriting XML file.
 '''
+import math
 import os
-import re
 import types
 import xml.etree.ElementTree as ET
 import maya.cmds as cmds
 import maya.mel as mel
 import maya.OpenMaya as OpenMaya
 import marigold.utility.NodeUtility as NodeUtility
+import marigold.utility.TransformUtility as TransformUtility
+import marigold.components as components
+
 
 CONTROLLER_PRESETS_PATH = 'controllers/presets/'
 FRAME_PRESETS_PATH = 'frames/presets/'
@@ -24,7 +27,267 @@ def getPresetPath( inPresetPath=CONTROLLER_PRESETS_PATH ):
     for path in scriptPaths:
         if path.find( 'marigold' ) is not -1:
             return path+'/'+inPresetPath
+
+def getObjectShortName( inObjectName ):
+    '''
+    Converts a long name to a short name.
     
+    @return: String. Short name of the object.
+    '''
+    splitName = inObjectName.split( '|' )
+    return splitName[ len( splitName )-1 ]
+
+def writeModuleXML( inRootObjectName, inModuleType, inModuleName ):
+    '''
+    Function for writing module xml.
+    
+    @param inRootObjectName: String. Name of module root object.
+    @param inModuleType: String. Type of module. This determines which sub-folder the XML is saved.
+    @param inModuleName: String. Name of the module XML file.
+    '''
+    # Get list of the module hierarchy. Root is always first
+    hierarchyList = NodeUtility.getFrameRootAllChildren( inRootObjectName )
+    hierarchyList.insert( 0, inRootObjectName )
+    
+    # START: Writing XML
+    xmlLines = []
+    xmlLines.append( '<data>' )
+    
+    for item in hierarchyList:        
+        # BIT INFO
+        itemName = getObjectShortName( item )        
+        itemParent = NodeUtility.cleanParentFullName( item )
+        itemMatrix = TransformUtility.getMatrix( item, 'matrix' )
+        itemPosition = TransformUtility.getMatrixTranslation( itemMatrix, OpenMaya.MSpace.kTransform )        
+        itemRotation = TransformUtility.getMatrixRotation( itemMatrix, 'eulerVector' )
+        
+        # START: Bit
+        xmlLines.append( '\t<bit name=\"{0}\" parent=\"{1}\">'.format( itemName, itemParent ) )        
+        xmlLines.append( '\t\t<plug name=\"translateX\">{0}</plug>'.format( itemPosition.x ) )
+        xmlLines.append( '\t\t<plug name=\"translateY\">{0}</plug>'.format( itemPosition.y ) )
+        xmlLines.append( '\t\t<plug name=\"translateZ\">{0}</plug>'.format( itemPosition.z ) )    
+        xmlLines.append( '\t\t<plug name=\"rotateX\">{0}</plug>'.format( math.degrees(itemRotation.x) ) )
+        xmlLines.append( '\t\t<plug name=\"rotateY\">{0}</plug>'.format( math.degrees(itemRotation.y) ) )
+        xmlLines.append( '\t\t<plug name=\"rotateZ\">{0}</plug>'.format( math.degrees(itemRotation.z) ) )
+        
+        # SHAPE
+        itemShape = NodeUtility.getDagPath( itemName ).child( 0 )
+        depFn = OpenMaya.MFnDependencyNode( itemShape )
+        shapeType = depFn.typeName()
+        if shapeType.find( 'gl' ) != -1:
+            itemShapeName = cmds.listRelatives( itemName, shapes=True, fullPath=True )[0]
+            # Start shape
+            xmlLines.append( '\t\t<shape name=\"{0}\">'.format( shapeType ) )
+            
+            # Get the shape's local position and scale.
+            for attr in cmds.listAttr( itemShapeName, channelBox=True ):
+                types = NodeUtility.getAttrTypes( itemShapeName, attr )
+                aPlug = NodeUtility.getPlug( itemShapeName, attr )
+                xmlLines.append( '\t\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr, types[0], types[1], NodeUtility.getPlugValue(aPlug) ) )
+            
+            # Get the shape's custom attributes.
+            for attr in cmds.listAttr( itemShapeName, multi=True, keyable=True ):
+                if attr.find( '[' ) is not -1:
+                    # Special case handle array attributes. The [] needs to be removed so we can get
+                    # the base name for the attribute. From there we can then loop through it's children.
+                    # First we get the connection since these plugs won't return a value, but rather a
+                    # connected node.
+                    connection = NodeUtility.getNodeAttrSource( itemShapeName, attr )
+                    bitChildren = cmds.listRelatives( itemName, type='transform', children=True, fullPath=True )
+                    for child in bitChildren:
+                        if child.find( connection[0] ):
+                            plugValue = child
+                    
+                    # Now we get the compound attribute's name by removing the index brackets.
+                    attrSplit = attr.split('[')
+                    attr = attrSplit[0]
+                else:
+                    aPlug = NodeUtility.getPlug( itemShapeName, attr )
+                    plugValue = NodeUtility.getPlugValue( aPlug )
+                    
+                types = NodeUtility.getAttrTypes( itemShapeName, attr )
+                if types[0] is not False:
+                    xmlLines.append( '\t\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr, types[0], types[1], plugValue ) )
+            # End shape
+            xmlLines.append( '\t\t</shape>' )
+            
+        # BIT COMPONENTS
+        bitComponents = components.getComponents( item )
+        for comp in bitComponents:
+            # Component info
+            compName = ''.join(i for i in comp if not i.isdigit())
+
+            # Start component.
+            xmlLines.append( '\t\t<component name=\"{0}\">'.format( compName ) )
+            
+            compSettings = NodeUtility.getModuleComponentSettings( comp )
+            for attr in compSettings:
+                types = NodeUtility.getAttrTypes( comp, attr )
+                aPlug = NodeUtility.getPlug( comp, attr )
+                plugValue = NodeUtility.getPlugValue( aPlug )
+                xmlLines.append( '\t\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr, types[0], types[1], plugValue ) )
+    
+            xmlLines.append( '\t\t</component>' )
+        # END: Bit
+        xmlLines.append( '\t</bit>' )
+        
+    # END: Writing XML
+    xmlLines.append( '</data>' )
+    
+    # Create the file
+    startingDirectory = getPresetPath( FRAME_PRESETS_PATH )
+    filePath = '{0}{1}'.format( startingDirectory, inModuleType )
+    fileName = '{0}.xml'.format( inModuleName )
+
+    newfile = file( os.path.join( filePath, fileName ), 'w')      
+    for i in xmlLines:
+        newfile.write( i+'\n' )
+    newfile.close()
+
+# Function for reading module xml.
+def readModuleXML( inFile ):
+    '''
+    Processes an XML file to get the parts/settings for the module.
+    
+    @param inFullPath: Full directory path + filename + extension of the XML file.
+    @return: A dictionary.
+    '''
+    returnDict = {}
+    xmlDoc = ET.parse( inFile )
+    xmlRoot = xmlDoc.getroot()
+    
+    bitList = []# List of each bit.
+    for bit in xmlRoot.findall( 'bit' ):
+        # Get bit shape
+        shape = bit.findall( 'shape' )
+        shapeType = shape[0].get('name')
+        
+        bitDict = { 'name':bit.get('name'), 'parent':bit.get('parent'), 'shapeType':shapeType }
+        
+        # Get all the bit's plugs.
+        plugList = []
+        for plug in bit.findall( 'plug' ):
+            plugList.append( { 'name':plug.get('name'), 'attrType':plug.get('attrType'), 'attrDataType':plug.get('attrDataType'), 'value':plug.text } )
+        bitDict[ 'plugs' ] = plugList
+        
+        # Get all the shape's plugs.
+        shapePlugList = []
+        for plug in shape[0].findall( 'plug' ):
+            shapePlugList.append( { 'name':plug.get('name'), 'attrType':plug.get('attrType'), 'attrDataType':plug.get('attrDataType'), 'value':plug.text } )
+        bitDict[ 'shape' ] = shapePlugList
+        
+        # Get all the components on the bit.
+        components = bit.findall( 'component' )
+        componentList = []
+        for comp in components:
+            comps = { 'name':comp.get('name') }
+            componentPlugList = []
+            for plug in comp.findall( 'plug' ):
+                componentPlugList.append( { 'name':plug.get('name'), 'attrType':plug.get('attrType'), 'attrDataType':plug.get('attrDataType'), 'value':plug.text } )
+            comps['plugs'] = componentPlugList
+            componentList.append( comps )
+        bitDict[ 'components' ] = componentList
+        
+        # Add the bit to the bit list.
+        bitList.append( bitDict )
+        
+    returnDict[ 'bits' ] = bitList
+    
+    return returnDict
+
+def loadModule( inFolder, inFileName ):
+    '''
+    Loads a module into the scene.
+    
+    @param inFolder: String. Name for the sub-folder the module XML is located.
+    @param inFileName: String. Name of the module XML. 
+    '''
+    dirPath = getPresetPath( FRAME_PRESETS_PATH+inFolder )
+    fullPath = dirPath+'/'+inFileName+'.xml'
+    xmlFile = readModuleXML( fullPath )
+    
+    # Create a temp group to put the module inside while creating.
+    moduleGroup = '|{0}'.format( cmds.group( em=True, name='TEMP' ) )
+    
+    # Grab all the bits.
+    bits = xmlFile['bits']
+    
+    # Make each bit.
+    tick = 0
+    storeBitConnections = []
+
+    while tick < len(bits):
+        if bits[0]['parent'] == 'None':
+            bitParent = moduleGroup
+        else:
+            bitParent = moduleGroup+bits[0]['parent']
+        
+        bitName = bits[0]['name']
+        bitPlugs = bits[0]['plugs']
+        shapePlugs = bits[0]['shape']
+        bitComponents = bits[0]['components']
+        
+        # Make the bit.
+        if cmds.objExists( bitParent ):
+            newBit = cmds.makeGLBit( name=bitName, objecttype=bits[0]['shapeType'] )            
+            cmds.parent( newBit, bitParent )
+            
+            # From this point we use the long name for the bit. This avoids any
+            # name clashes.
+            fullBitName = '{0}{1}'.format( bitParent, newBit )
+            
+            # Setup plugs for transform and custom attributes.
+            for plug in bitPlugs:
+                if not NodeUtility.attributeCheck( fullBitName, plug['name'] ):
+                    NodeUtility.addPlug( fullBitName, plug['name'], plug['attrType'], plug['attrDataType'] )
+                    if plug['value'] is not None:
+                        NodeUtility.setPlug( fullBitName, plug['name'], plug['value'], inAttrDataType=plug['attrDataType'] )
+                else:          
+                    # Setup position and rotation.
+                    NodeUtility.setPlug( fullBitName, plug['name'], plug['value'] )
+            
+            # Setup plugs for shape attributes.
+            shapeName = cmds.listRelatives( fullBitName, shapes=True )
+            fullShapeName = '{0}|{1}'.format( fullBitName, shapeName[0] )
+            for plug in shapePlugs:
+                if plug['attrDataType'] == 'TdataCompound':
+                    # We skip compound nodes at this stage. They are for the child arrow drawing and must be
+                    # hooked up after all the objects are created.
+                    connectionChild = '{0}{1}'.format( moduleGroup, plug['value'] )
+                    storeBitConnections.append( { 'parent':fullBitName, 'child':connectionChild } )
+                else:
+                    NodeUtility.setPlug( fullShapeName, plug['name'], plug['value'], inAttrDataType=plug['attrDataType'] )
+            
+            # Setup bit components.
+            for comp in bitComponents:
+                compType = comp['name']
+                
+                # We have to special case components that have additional kwargs.
+                if compType == 'CurveControlComponent':
+                    # Handle curve control component type.
+                    for plug in comp['plugs']:
+                        if plug['name'] == 'curveType':
+                            curveType = plug['value']
+                    newComp = components.addComponentToObject( compType, inObject=fullBitName, curveType=curveType )
+                else:
+                    # Handle basic component.
+                    newComp = components.addComponentToObject( compType, inObject=fullBitName )
+
+                for plug in comp['plugs']:
+                    NodeUtility.setPlug( newComp.name(), plug['name'], plug['value'], inAttrDataType=plug['attrDataType'] )
+                    
+            # Remove the bit from the list
+            bits.remove( bits[0] )
+            
+    # Now do the hook ups for the child arrows.
+    for i in storeBitConnections:
+        NodeUtility.setBitChild( i['parent'], i['child'] )
+
+'''
+
+OLD XML SHIT. REMOVE!!!!!!!!
+
+'''
 def createControlXML():
     '''
     Creates/updates module XML file.

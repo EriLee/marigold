@@ -1,0 +1,281 @@
+<data>
+	<bit name="controller" parent="None">
+		<plug name="translateX">0.0</plug>
+		<plug name="translateY">0.0</plug>
+		<plug name="translateZ">0.0</plug>
+		<plug name="rotateX">0.0</plug>
+		<plug name="rotateY">-0.0</plug>
+		<plug name="rotateZ">0.0</plug>
+		<shape name="glSphere">
+			<plug name="localPositionX" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionY" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionZ" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localScaleX" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleY" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleZ" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="rotateX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="backAlpha" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="lineWidth" attrType="attributeType" attrDataType="long">1</plug>
+			<plug name="colorR" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="colorG" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="colorB" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="transparency" attrType="attributeType" attrDataType="float">0.800000011921</plug>
+			<plug name="childLinkColorR" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="childLinkColorG" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="childLinkColorB" attrType="attributeType" attrDataType="float">0.40000000596</plug>
+			<plug name="childTransparency" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="childArrowRadius" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="childArrowSegments" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="latitude" attrType="attributeType" attrDataType="long">4</plug>
+			<plug name="longitude" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="radius" attrType="attributeType" attrDataType="float">2.0</plug>
+			<plug name="drawType" attrType="attributeType" attrDataType="enum">2</plug>
+			<plug name="targetWorldMatrix" attrType="dataType" attrDataType="TdataCompound">|controller|controller1</plug>
+			<plug name="arrowLength" attrType="attributeType" attrDataType="float">2.0</plug>
+		</shape>
+		<component name="BasicJointComponent">
+			<plug name="parentName" attrType="attributeType" attrDataType="message">None</plug>
+			<plug name="classType" attrType="dataType" attrDataType="string">BasicJointComponent</plug>
+			<plug name="jointName" attrType="dataType" attrDataType="string">j_l_shoulder</plug>
+		</component>
+		<component name="ModuleRootComponent">
+			<plug name="parentName" attrType="attributeType" attrDataType="message">None</plug>
+			<plug name="classType" attrType="dataType" attrDataType="string">ModuleRootComponent</plug>
+			<plug name="moduleName" attrType="dataType" attrDataType="string">fkArm</plug>
+			<plug name="buildPriority" attrType="attributeType" attrDataType="byte">0</plug>
+			<plug name="characterRoot" attrType="attributeType" attrDataType="message">None</plug>
+		</component>
+		<component name="CurveControlComponent">
+			<plug name="parentName" attrType="attributeType" attrDataType="message">None</plug>
+			<plug name="classType" attrType="dataType" attrDataType="string">CurveControlComponent</plug>
+			<plug name="controlName" attrType="dataType" attrDataType="string">ct_l_shoulder</plug>
+			<plug name="curveType" attrType="dataType" attrDataType="string">circle</plug>
+			<plug name="controlColor" attrType="attributeType" attrDataType="byte">2</plug>
+			<plug name="controlPositionX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlPositionY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlPositionZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlRotationX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlRotationY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlRotationZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlScaleX" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="controlScaleY" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="controlScaleZ" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="curve0CV0x" attrType="attributeType" attrDataType="float">2.30510640144</plug>
+			<plug name="curve0CV0y" attrType="attributeType" attrDataType="float">1.41147068936e-16</plug>
+			<plug name="curve0CV0z" attrType="attributeType" attrDataType="float">-2.30510640144</plug>
+			<plug name="curve0CV1x" attrType="attributeType" attrDataType="float">-3.71917105835e-16</plug>
+			<plug name="curve0CV1y" attrType="attributeType" attrDataType="float">1.99612101987e-16</plug>
+			<plug name="curve0CV1z" attrType="attributeType" attrDataType="float">-3.2599132061</plug>
+			<plug name="curve0CV2x" attrType="attributeType" attrDataType="float">-2.30510640144</plug>
+			<plug name="curve0CV2y" attrType="attributeType" attrDataType="float">1.41147068936e-16</plug>
+			<plug name="curve0CV2z" attrType="attributeType" attrDataType="float">-2.30510640144</plug>
+			<plug name="curve0CV3x" attrType="attributeType" attrDataType="float">-3.2599132061</plug>
+			<plug name="curve0CV3y" attrType="attributeType" attrDataType="float">5.78425916632e-32</plug>
+			<plug name="curve0CV3z" attrType="attributeType" attrDataType="float">-9.44641212448e-16</plug>
+			<plug name="curve0CV4x" attrType="attributeType" attrDataType="float">-2.30510640144</plug>
+			<plug name="curve0CV4y" attrType="attributeType" attrDataType="float">-1.41147068936e-16</plug>
+			<plug name="curve0CV4z" attrType="attributeType" attrDataType="float">2.30510640144</plug>
+			<plug name="curve0CV5x" attrType="attributeType" attrDataType="float">-9.8227541569e-16</plug>
+			<plug name="curve0CV5y" attrType="attributeType" attrDataType="float">-1.99612101987e-16</plug>
+			<plug name="curve0CV5z" attrType="attributeType" attrDataType="float">3.2599132061</plug>
+			<plug name="curve0CV6x" attrType="attributeType" attrDataType="float">2.30510640144</plug>
+			<plug name="curve0CV6y" attrType="attributeType" attrDataType="float">-1.41147068936e-16</plug>
+			<plug name="curve0CV6z" attrType="attributeType" attrDataType="float">2.30510640144</plug>
+			<plug name="curve0CV7x" attrType="attributeType" attrDataType="float">3.2599132061</plug>
+			<plug name="curve0CV7y" attrType="attributeType" attrDataType="float">-1.07212043722e-31</plug>
+			<plug name="curve0CV7z" attrType="attributeType" attrDataType="float">1.7509057228e-15</plug>
+			<plug name="curve0CV8x" attrType="attributeType" attrDataType="float">2.30510640144</plug>
+			<plug name="curve0CV8y" attrType="attributeType" attrDataType="float">1.41147068936e-16</plug>
+			<plug name="curve0CV8z" attrType="attributeType" attrDataType="float">-2.30510640144</plug>
+			<plug name="curve0CV9x" attrType="attributeType" attrDataType="float">-3.71917105835e-16</plug>
+			<plug name="curve0CV9y" attrType="attributeType" attrDataType="float">1.99612101987e-16</plug>
+			<plug name="curve0CV9z" attrType="attributeType" attrDataType="float">-3.2599132061</plug>
+			<plug name="curve0CV10x" attrType="attributeType" attrDataType="float">-2.30510640144</plug>
+			<plug name="curve0CV10y" attrType="attributeType" attrDataType="float">1.41147068936e-16</plug>
+			<plug name="curve0CV10z" attrType="attributeType" attrDataType="float">-2.30510640144</plug>
+		</component>
+	</bit>
+	<bit name="controller1" parent="|controller">
+		<plug name="translateX">8.0</plug>
+		<plug name="translateY">0.0</plug>
+		<plug name="translateZ">0.0</plug>
+		<plug name="rotateX">0.0</plug>
+		<plug name="rotateY">-44.3553618338</plug>
+		<plug name="rotateZ">0.0</plug>
+		<shape name="glSphere">
+			<plug name="localPositionX" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionY" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionZ" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localScaleX" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleY" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleZ" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="rotateX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="backAlpha" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="lineWidth" attrType="attributeType" attrDataType="long">1</plug>
+			<plug name="colorR" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="colorG" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="colorB" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="transparency" attrType="attributeType" attrDataType="float">0.800000011921</plug>
+			<plug name="childLinkColorR" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="childLinkColorG" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="childLinkColorB" attrType="attributeType" attrDataType="float">0.40000000596</plug>
+			<plug name="childTransparency" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="childArrowRadius" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="childArrowSegments" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="latitude" attrType="attributeType" attrDataType="long">4</plug>
+			<plug name="longitude" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="radius" attrType="attributeType" attrDataType="float">2.0</plug>
+			<plug name="drawType" attrType="attributeType" attrDataType="enum">2</plug>
+			<plug name="targetWorldMatrix" attrType="dataType" attrDataType="TdataCompound">|controller|controller1|controller2</plug>
+			<plug name="arrowLength" attrType="attributeType" attrDataType="float">2.0</plug>
+		</shape>
+		<component name="BasicJointComponent">
+			<plug name="parentName" attrType="attributeType" attrDataType="message">None</plug>
+			<plug name="classType" attrType="dataType" attrDataType="string">BasicJointComponent</plug>
+			<plug name="jointName" attrType="dataType" attrDataType="string">j_l_elbow</plug>
+		</component>
+		<component name="CurveControlComponent">
+			<plug name="parentName" attrType="attributeType" attrDataType="message">None</plug>
+			<plug name="classType" attrType="dataType" attrDataType="string">CurveControlComponent</plug>
+			<plug name="controlName" attrType="dataType" attrDataType="string">ct_l_elbow</plug>
+			<plug name="curveType" attrType="dataType" attrDataType="string">circle</plug>
+			<plug name="controlColor" attrType="attributeType" attrDataType="byte">4</plug>
+			<plug name="controlPositionX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlPositionY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlPositionZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlRotationX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlRotationY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlRotationZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlScaleX" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="controlScaleY" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="controlScaleZ" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="curve0CV0x" attrType="attributeType" attrDataType="float">3.0940682888</plug>
+			<plug name="curve0CV0y" attrType="attributeType" attrDataType="float">1.89457050452e-16</plug>
+			<plug name="curve0CV0z" attrType="attributeType" attrDataType="float">-3.0940682888</plug>
+			<plug name="curve0CV1x" attrType="attributeType" attrDataType="float">-4.99212049415e-16</plug>
+			<plug name="curve0CV1y" attrType="attributeType" attrDataType="float">2.67932720722e-16</plug>
+			<plug name="curve0CV1z" attrType="attributeType" attrDataType="float">-4.3756737709</plug>
+			<plug name="curve0CV2x" attrType="attributeType" attrDataType="float">-3.0940682888</plug>
+			<plug name="curve0CV2y" attrType="attributeType" attrDataType="float">1.89457050452e-16</plug>
+			<plug name="curve0CV2z" attrType="attributeType" attrDataType="float">-3.0940682888</plug>
+			<plug name="curve0CV3x" attrType="attributeType" attrDataType="float">-4.3756737709</plug>
+			<plug name="curve0CV3y" attrType="attributeType" attrDataType="float">7.76402028676e-32</plug>
+			<plug name="curve0CV3z" attrType="attributeType" attrDataType="float">-1.26796067644e-15</plug>
+			<plug name="curve0CV4x" attrType="attributeType" attrDataType="float">-3.0940682888</plug>
+			<plug name="curve0CV4y" attrType="attributeType" attrDataType="float">-1.89457050452e-16</plug>
+			<plug name="curve0CV4z" attrType="attributeType" attrDataType="float">3.0940682888</plug>
+			<plug name="curve0CV5x" attrType="attributeType" attrDataType="float">-1.31847581559e-15</plug>
+			<plug name="curve0CV5y" attrType="attributeType" attrDataType="float">-2.67932720722e-16</plug>
+			<plug name="curve0CV5z" attrType="attributeType" attrDataType="float">4.3756737709</plug>
+			<plug name="curve0CV6x" attrType="attributeType" attrDataType="float">3.0940682888</plug>
+			<plug name="curve0CV6y" attrType="attributeType" attrDataType="float">-1.89457050452e-16</plug>
+			<plug name="curve0CV6z" attrType="attributeType" attrDataType="float">3.0940682888</plug>
+			<plug name="curve0CV7x" attrType="attributeType" attrDataType="float">4.3756737709</plug>
+			<plug name="curve0CV7y" attrType="attributeType" attrDataType="float">-1.43907180507e-31</plug>
+			<plug name="curve0CV7z" attrType="attributeType" attrDataType="float">2.35018290941e-15</plug>
+			<plug name="curve0CV8x" attrType="attributeType" attrDataType="float">3.0940682888</plug>
+			<plug name="curve0CV8y" attrType="attributeType" attrDataType="float">1.89457050452e-16</plug>
+			<plug name="curve0CV8z" attrType="attributeType" attrDataType="float">-3.0940682888</plug>
+			<plug name="curve0CV9x" attrType="attributeType" attrDataType="float">-4.99212049415e-16</plug>
+			<plug name="curve0CV9y" attrType="attributeType" attrDataType="float">2.67932720722e-16</plug>
+			<plug name="curve0CV9z" attrType="attributeType" attrDataType="float">-4.3756737709</plug>
+			<plug name="curve0CV10x" attrType="attributeType" attrDataType="float">-3.0940682888</plug>
+			<plug name="curve0CV10y" attrType="attributeType" attrDataType="float">1.89457050452e-16</plug>
+			<plug name="curve0CV10z" attrType="attributeType" attrDataType="float">-3.0940682888</plug>
+		</component>
+	</bit>
+	<bit name="controller2" parent="|controller|controller1">
+		<plug name="translateX">8.0</plug>
+		<plug name="translateY">0.0</plug>
+		<plug name="translateZ">0.0</plug>
+		<plug name="rotateX">0.0</plug>
+		<plug name="rotateY">-0.0</plug>
+		<plug name="rotateZ">0.0</plug>
+		<shape name="glSphere">
+			<plug name="localPositionX" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionY" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localPositionZ" attrType="attributeType" attrDataType="doubleLinear">0.0</plug>
+			<plug name="localScaleX" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleY" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="localScaleZ" attrType="attributeType" attrDataType="doubleLinear">1.0</plug>
+			<plug name="rotateX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="rotateZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="backAlpha" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="lineWidth" attrType="attributeType" attrDataType="long">1</plug>
+			<plug name="colorR" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="colorG" attrType="attributeType" attrDataType="float">0.20000000298</plug>
+			<plug name="colorB" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="transparency" attrType="attributeType" attrDataType="float">0.800000011921</plug>
+			<plug name="childLinkColorR" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="childLinkColorG" attrType="attributeType" attrDataType="float">0.10000000149</plug>
+			<plug name="childLinkColorB" attrType="attributeType" attrDataType="float">0.40000000596</plug>
+			<plug name="childTransparency" attrType="attributeType" attrDataType="float">0.5</plug>
+			<plug name="childArrowRadius" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="childArrowSegments" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="latitude" attrType="attributeType" attrDataType="long">4</plug>
+			<plug name="longitude" attrType="attributeType" attrDataType="long">6</plug>
+			<plug name="radius" attrType="attributeType" attrDataType="float">2.0</plug>
+			<plug name="drawType" attrType="attributeType" attrDataType="enum">2</plug>
+			<plug name="arrowLength" attrType="attributeType" attrDataType="float">2.0</plug>
+		</shape>
+		<component name="CurveControlComponent">
+			<plug name="parentName" attrType="attributeType" attrDataType="message">None</plug>
+			<plug name="classType" attrType="dataType" attrDataType="string">CurveControlComponent</plug>
+			<plug name="controlName" attrType="dataType" attrDataType="string">ct_l_wrist</plug>
+			<plug name="curveType" attrType="dataType" attrDataType="string">circle</plug>
+			<plug name="controlColor" attrType="attributeType" attrDataType="byte">1</plug>
+			<plug name="controlPositionX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlPositionY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlPositionZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlRotationX" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlRotationY" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlRotationZ" attrType="attributeType" attrDataType="float">0.0</plug>
+			<plug name="controlScaleX" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="controlScaleY" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="controlScaleZ" attrType="attributeType" attrDataType="float">1.0</plug>
+			<plug name="curve0CV0x" attrType="attributeType" attrDataType="float">2.30934858322</plug>
+			<plug name="curve0CV0y" attrType="attributeType" attrDataType="float">1.41406816884e-16</plug>
+			<plug name="curve0CV0z" attrType="attributeType" attrDataType="float">-2.30934858322</plug>
+			<plug name="curve0CV1x" attrType="attributeType" attrDataType="float">-3.72601534926e-16</plug>
+			<plug name="curve0CV1y" attrType="attributeType" attrDataType="float">1.99979436354e-16</plug>
+			<plug name="curve0CV1z" attrType="attributeType" attrDataType="float">-3.26591229439</plug>
+			<plug name="curve0CV2x" attrType="attributeType" attrDataType="float">-2.30934858322</plug>
+			<plug name="curve0CV2y" attrType="attributeType" attrDataType="float">1.41406816884e-16</plug>
+			<plug name="curve0CV2z" attrType="attributeType" attrDataType="float">-2.30934858322</plug>
+			<plug name="curve0CV3x" attrType="attributeType" attrDataType="float">-3.26591229439</plug>
+			<plug name="curve0CV3y" attrType="attributeType" attrDataType="float">5.79490385542e-32</plug>
+			<plug name="curve0CV3z" attrType="attributeType" attrDataType="float">-9.46379641693e-16</plug>
+			<plug name="curve0CV4x" attrType="attributeType" attrDataType="float">-2.30934858322</plug>
+			<plug name="curve0CV4y" attrType="attributeType" attrDataType="float">-1.41406816884e-16</plug>
+			<plug name="curve0CV4z" attrType="attributeType" attrDataType="float">2.30934858322</plug>
+			<plug name="curve0CV5x" attrType="attributeType" attrDataType="float">-9.84082983999e-16</plug>
+			<plug name="curve0CV5y" attrType="attributeType" attrDataType="float">-1.99979436354e-16</plug>
+			<plug name="curve0CV5z" attrType="attributeType" attrDataType="float">3.26591229439</plug>
+			<plug name="curve0CV6x" attrType="attributeType" attrDataType="float">2.30934858322</plug>
+			<plug name="curve0CV6y" attrType="attributeType" attrDataType="float">-1.41406816884e-16</plug>
+			<plug name="curve0CV6z" attrType="attributeType" attrDataType="float">2.30934858322</plug>
+			<plug name="curve0CV7x" attrType="attributeType" attrDataType="float">3.26591229439</plug>
+			<plug name="curve0CV7y" attrType="attributeType" attrDataType="float">-1.07409338693e-31</plug>
+			<plug name="curve0CV7z" attrType="attributeType" attrDataType="float">1.75412783613e-15</plug>
+			<plug name="curve0CV8x" attrType="attributeType" attrDataType="float">2.30934858322</plug>
+			<plug name="curve0CV8y" attrType="attributeType" attrDataType="float">1.41406816884e-16</plug>
+			<plug name="curve0CV8z" attrType="attributeType" attrDataType="float">-2.30934858322</plug>
+			<plug name="curve0CV9x" attrType="attributeType" attrDataType="float">-3.72601534926e-16</plug>
+			<plug name="curve0CV9y" attrType="attributeType" attrDataType="float">1.99979436354e-16</plug>
+			<plug name="curve0CV9z" attrType="attributeType" attrDataType="float">-3.26591229439</plug>
+			<plug name="curve0CV10x" attrType="attributeType" attrDataType="float">-2.30934858322</plug>
+			<plug name="curve0CV10y" attrType="attributeType" attrDataType="float">1.41406816884e-16</plug>
+			<plug name="curve0CV10z" attrType="attributeType" attrDataType="float">-2.30934858322</plug>
+		</component>
+		<component name="BasicJointComponent">
+			<plug name="parentName" attrType="attributeType" attrDataType="message">None</plug>
+			<plug name="classType" attrType="dataType" attrDataType="string">BasicJointComponent</plug>
+			<plug name="jointName" attrType="dataType" attrDataType="string">j_l_wrist</plug>
+		</component>
+	</bit>
+</data>

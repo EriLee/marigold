@@ -1,5 +1,4 @@
 import maya.cmds as cmds
-import marigold.utility.FrameUtility as FrameUtility
 import marigold.utility.NodeUtility as NodeUtility
 
 class BaseComponent( object ):
@@ -57,12 +56,12 @@ class BaseComponent( object ):
         cmds.setAttr( '{0}.classType'.format( cons[0] ), cons[1], type='string', lock=cons[2] )
     
     def requiredAttributes( self, *args, **kwargs ):
-        FrameUtility.addPlug( self.newNode, 'parentName', 'attributeType', 'message' )
+        NodeUtility.addPlug( self.newNode, 'parentName', 'attributeType', 'message' )
         #cmds.addAttr( newNode, longName='parentName', attributeType='message', storable=True )
         #self.setAttribute( cls(), 'parentName', self.newNode, inNodeName=self.newNode )
         self.setAttribute( 'parentName', self.newNode, self.newNode )
         
-        FrameUtility.addPlug( self.newNode, 'classType', 'dataType', 'string' )
+        NodeUtility.addPlug( self.newNode, 'classType', 'dataType', 'string' )
         #cls( self.newNode ).classType = [ self.newNode, self.nodeType, True ]
         self.classType = [ self.newNode, self.nodeType, True ]
         
@@ -96,6 +95,8 @@ class BaseComponent( object ):
         if inQTType == 'QLineEdit':
             # Get the text from a QLineEdit.
             plugValue = inPlugValue.text()
+        else:
+            plugValue = inPlugValue
         self.setAttribute( inPlugName, plugValue, inNodeName )
         
     def setAttribute( self, inPlugName, inPlugValue, inNodeName, inLock=False ):

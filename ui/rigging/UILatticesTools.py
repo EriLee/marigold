@@ -9,9 +9,12 @@ Date: 9/7/2013
 '''
 from PySide import QtCore
 from PySide import QtGui
+import maya.cmds as cmds
 from marigold.ui import clearLayout
 import marigold.ui.widgets.QTWidgets as QTWidgets
 import marigold.utility.XMLUtility as XMLUtility
+import marigold.utility.NodeUtility as NodeUtility
+import marigold.components as Components
 
 class UILatticeTools( QtGui.QWidget ):        
     def __init__( self ):
@@ -86,7 +89,7 @@ class UILatticeTools( QtGui.QWidget ):
         
         # Buttons
         saveModeluBtn = QTWidgets.imageTextButton( 'Save Module', ':/riggingUI/icons/icon_match_translation.png', [16,16] )
-        #matchTranslationBtn.clicked.connect( lambda a='tran':TransformUtility.matchTransforms( a ) )
+        saveModeluBtn.clicked.connect( lambda:self.saveModulePrompt() )
         latticeToolsGrid.addWidget( saveModeluBtn, 0, 0 )        
         
         # Build the widget
@@ -109,6 +112,138 @@ class UILatticeTools( QtGui.QWidget ):
                     latticePresets = XMLUtility.getXMLInFolder( presetsPath )
                     for lattice in latticePresets:
                         description = 'From here you can search these documents. Enter your search words into the box below and click /"search/".'
-                        
-                        card = QTWidgets.latticeCard( buttonType, lattice, description )                        
-                        self.scrollLayout.addWidget( card )
+                        self.scrollLayout.addWidget( latticeCard( buttonType, lattice, description, parent=self.scrollLayout ) )
+    
+    def saveModulePrompt( self ):
+        self.dialog = ModuleTypePrompt( self )
+        self.dialog.show()
+        
+    def saveModule( self ):
+        '''
+        Save the module into an XML file for re-use.
+        We assume that the root node of the module is the one with the module root meta node.
+        This means it and all of it's children will be saved in the XML.
+        '''
+        # Get the selected module
+        item = cmds.ls( long=True, selection=True )[0]
+        
+        # Try to get the module meta component.
+        moduleComp = Components.searchModule( item, 'ModuleRootComponent' )
+        
+        if moduleComp:
+            # Get the module info and save it as an XML.
+            modulePlug = NodeUtility.getPlug( moduleComp[1], 'moduleName' )
+            moduleName = NodeUtility.getPlugValue( modulePlug )
+            XMLUtility.writeModuleXML( moduleComp[0], self.SELECTED_ITEM, moduleName )
+            
+class ModuleTypePrompt( QtGui.QWidget ):
+    def __init__( self, parent=None ):
+        super( ModuleTypePrompt, self ).__init__()
+        
+        self.parent = parent
+        
+        moduleList = ['roots', 'spines', 'arms', 'legs', 
+                      'hands', 'feet', 'heads']
+        
+        self.setWindowTitle( 'Select Module Type' )
+        self.setFixedSize( 250, 200 )
+        
+        self.accept_button = QtGui.QPushButton( 'Accept' )
+        self.accept_button.clicked.connect( lambda:self.returnSelection() )
+        self.cancel_button = QtGui.QPushButton( 'Cancel' )
+        self.cancel_button.clicked.connect( lambda:self.close() )
+        
+        button_layout = QtGui.QHBoxLayout()
+        button_layout.setSpacing( 2 )
+        button_layout.addStretch()
+        button_layout.addWidget( self.accept_button )
+        button_layout.addWidget( self.cancel_button )
+        
+        self.list = QtGui.QListWidget()
+        self.list.addItems( moduleList )
+        
+        main_layout = QtGui.QVBoxLayout()
+        main_layout.setSpacing( 2 )
+        main_layout.addWidget( self.list )
+        main_layout.addLayout( button_layout )
+        
+        self.setLayout( main_layout )
+        
+    def returnSelection( self ):
+        for x in self.list.selectedItems():
+            self.parent.SELECTED_ITEM = x.text()
+            self.parent.saveModule()
+            self.close()
+
+def latticeCard( inLatticeType, inLattice, inLatticeDescription, parent=None ):
+    nameLabelHeight = 14
+    cardHeight = 64
+    cardBackgroundColor = {'roots':'383232',
+                           'spines':'383832',
+                           'arms':'323834',
+                           'legs':'323638',
+                           'hands':'343238',
+                           'feet':'383237',
+                           'heads':'383232'}
+        
+    cardLabelColor = {'roots':'5d5353',
+                      'spines':'5d5d53',
+                      'arms':'535d56',
+                      'legs':'53595d',
+                      'hands':'57535d',
+                      'feet':'5d535b',
+                      'heads':'5d5353'}
+    
+    cardButtonColor = {'roots':'4b4141',
+                      'spines':'4b4b43',
+                      'arms':'434b45',
+                      'legs':'42474a',
+                      'hands':'45424a',
+                      'feet':'4a4249',
+                      'heads':'4a4242'}
+    
+    latticeName = QtGui.QLabel()
+    latticeName.setIndent( 10 )
+    latticeName.setText( str.upper( str( inLattice ) ) )
+    latticeName.setAlignment( QtCore.Qt.AlignLeft )
+    latticeName.setMaximumHeight( nameLabelHeight )
+    latticeName.setStyleSheet( 'font:{0}; font-size:{1}px; color:{2}; background-color:#{3}'.format( 'bold',
+                                                                                                     10,
+                                                                                                     'white',
+                                                                                                     cardLabelColor[ inLatticeType ] ) )
+    
+    latticeDescription = QtGui.QLabel()
+    latticeDescription.setMinimumHeight( 45 )
+    latticeDescription.setMaximumHeight( 45 )
+    latticeDescription.setWordWrap( True )
+    latticeDescription.setText( inLatticeDescription )
+    
+    latticeButton = QTWidgets.imageTextButton( None, ':/riggingUI/icons/icon_plus32.png', [32,32] )
+    latticeButton.setMaximumSize( QtCore.QSize( 40, 40 ) )
+    latticeButton.setStyleSheet( 'background-color:#{0}'.format( cardButtonColor[ inLatticeType ]) )
+    latticeButton.clicked.connect( lambda a=inLatticeType, b=inLattice:XMLUtility.loadModule( a, b ) )
+    
+    latticeGrid = QtGui.QGridLayout()
+    latticeGrid.setAlignment( QtCore.Qt.AlignTop )
+    latticeGrid.setContentsMargins( 0, 0, 0, 0 )
+    latticeGrid.setHorizontalSpacing( 0 )
+    
+    latticeGrid.addWidget( latticeDescription, 0, 0 )
+    latticeGrid.addWidget( latticeButton, 0, 1 )
+    latticeGrid.setColumnMinimumWidth( 1, 40 )
+    
+    latticeRow = QtGui.QVBoxLayout()
+    latticeRow.setSpacing( 0 )
+    latticeRow.setContentsMargins( 0,0,0,0 )
+    latticeRow.addWidget( latticeName )
+    latticeRow.addLayout( latticeGrid )
+
+    frame = QtGui.QFrame()
+    frame.setFrameShadow( QtGui.QFrame.Sunken )
+    frame.setFrameShape( QtGui.QFrame.StyledPanel )
+    frame.setLineWidth( 2 )
+    frame.setStyleSheet( 'padding:1px; background-color:#{0}'.format( cardBackgroundColor[ inLatticeType ] ) )
+    frame.setMinimumHeight( cardHeight )
+    frame.setLayout( latticeRow )
+    
+    return frame

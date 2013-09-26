@@ -20,16 +20,21 @@ import marigold.components as Components
 class UIComponentsTools( QtGui.QWidget ):
     SCRIPT_JOB_NUMBER = -1
     SELECTED_OBJECT_LONGNAME = None
-    ACTIVE_CONTROL_EDITS = []
         
     def __init__( self ):
         super( UIComponentsTools, self ).__init__()
-    
+        
         layout = QtGui.QVBoxLayout( self )
 
         # COMPONENTS MENU BAR
         menuFrame = QtGui.QFrame()
         menuFrame.setMinimumHeight( 20 )
+        
+        # Meta menu.
+        moduleMeta = QtGui.QAction( '&Module Meta', self)
+        moduleMeta.triggered.connect( lambda a='ModuleRootComponent':Components.addComponentToObject( a ) )
+        characterMeta = QtGui.QAction( '&Character Meta', self)
+        characterMeta.triggered.connect( lambda a='CharacterRootComponent':Components.addComponentToObject( a ) )
         
         # Joints menu
         basicJoint = QtGui.QAction( '&Basic Joint', self)
@@ -55,6 +60,10 @@ class UIComponentsTools( QtGui.QWidget ):
         
         # Setup menus.
         componentsMenubar = QtGui.QMenuBar( menuFrame )
+        
+        metaMenu = componentsMenubar.addMenu( '&Meta' )
+        metaMenu.addAction( moduleMeta )
+        metaMenu.addAction( characterMeta )
         
         jointsMenu = componentsMenubar.addMenu( '&Joints' )
         jointsMenu.addAction( basicJoint )
@@ -145,7 +154,7 @@ class UIComponentsTools( QtGui.QWidget ):
                         component = componentsClassList[ nodeName ]
                         nodeName = nodeName
                         componentClass = Components.str_to_class( component )
-                        componentGui = componentClass( component ).componentGui( nodeName )
+                        componentGui = componentClass( component ).componentGui( nodeName, parent=self )
                         self.componentsLayout.addWidget( componentGui )
                         
 

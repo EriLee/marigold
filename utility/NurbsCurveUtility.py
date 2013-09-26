@@ -148,8 +148,6 @@ def addCurveValues( inObj, inPoints ):
     @param inObj: String. Name of object to add curve cv values too.
     @param inPoints: List of curves and their cv points. 
     '''
-    print 'inObj: {0}'.format( inObj )
-    print 'inPoints: {0}'.format( inPoints )
     # Naming convention: curve + curve# + CV + cv# + axis    
     for index in xrange( len(inPoints) ):
         # Create a compound attribute to hold the curves.
@@ -162,8 +160,6 @@ def addCurveValues( inObj, inPoints ):
         for cv in curDict:
             cvPoint = curDict[cv]
             cvName = '{0}CV{1}'.format( curveName, cv )
-            print 'cvPoint: {0}'.format( cvPoint )
-            print 'cvName: {0}'.format( cvName )
             cmds.addAttr( inObj, longName=cvName, attributeType='float3', parent=curveName )
             cmds.addAttr( inObj, longName='{0}x'.format(cvName), attributeType='float', parent=cvName, defaultValue=cvPoint[0] )
             cmds.addAttr( inObj, longName='{0}y'.format(cvName), attributeType='float', parent=cvName, defaultValue=cvPoint[1] )
@@ -198,6 +194,7 @@ def readCurveValues( inObj ):
     created with addCurveValues().
     
     @param inObj: String. Name of object to add curve cv values too.
+    @return: List of dicts.
     '''
     curveAttrs = cmds.listAttr( inObj, string='curve*', category='nurbCurve' )
     

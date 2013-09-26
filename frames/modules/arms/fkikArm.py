@@ -1,7 +1,6 @@
 import maya.cmds as cmds
 import maya.OpenMayaAnim as OpenMayaAnim
 import marigold.meta.metaNode as metaNode
-import marigold.utility.FrameUtility as FrameUtility
 import marigold.controllers.marigoldControls as marigoldControls
 import marigold.skeleton.marigoldJoints as marigoldJoints
 import marigold.utility.NodeUtility as NodeUtility
@@ -50,7 +49,7 @@ def buildModule():
     modules = NodeUtility.getMetaNodesInScene( 'frameModule' )
     
     # Read the meta node.
-    nodeData = FrameUtility.getFrameBitSettings( modules[0] )
+    nodeData = NodeUtility.getFrameBitSettings( modules[0] )
     prefix = nodeData['prefix'] 
     
     # Get the frame module bits.
