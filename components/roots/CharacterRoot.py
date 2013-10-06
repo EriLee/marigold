@@ -64,7 +64,7 @@ class componentWidget( QtGui.QWidget ):
         propertyStack = QtGui.QVBoxLayout()
         
         propertyFrame = QTWidgets.basicFrame()
-        propertyFrame.setMinimumHeight( 40 )
+        propertyFrame.setMinimumHeight( 120 )
         propertyFrame.setMaximumHeight( 120 )
         
         # Add string edit property

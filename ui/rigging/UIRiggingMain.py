@@ -19,7 +19,7 @@ from marigold.ui import clearLayout
 import marigold.ui.rigging.UIBitsTools as UIBitsTools
 import marigold.ui.rigging.UIComponentsTools as UIComponentsTools
 import marigold.ui.rigging.UILatticesTools as UILatticesTools
-
+import marigold.ui.rigging.UICharactersTools as UICharactersTools
 
 '''
 C:\Python27\Lib\site-packages\PySide\pyside-rcc.exe -py2 E:\maya\scripts\marigold\ui\qtui.qrc > E:\maya\scripts\marigold\ui\qtui_resources.py
@@ -106,19 +106,16 @@ class UIRiggingMain( QtGui.QDialog ):
         buildClass = {0:UIBitsTools.UIBitsTools,
                       1:UIComponentsTools.UIComponentsTools,
                       2:UILatticesTools.UILatticeTools,
-                      3:self.build_character_gui}
+                      3:UICharactersTools.UICharacterTools}
         guiClass = buildClass[ currentComboIndex ]
-        if currentComboIndex == 0 or currentComboIndex == 1 or currentComboIndex == 2:
-            self.sub_layout.addWidget( guiClass() )
-            
-            if currentComboIndex == 1:
-                # Set the script job number so we can delete it outside of the
-                # component GUI. The script job can hang around if the main GUI
-                # is closed using the X while the component section is active.
-                componentsToolsUI = self.sub_layout.itemAt( 0 ).widget()
-                self.SCRIPT_JOB_NUMBER = componentsToolsUI.SCRIPT_JOB_NUMBER
-        else:
-            guiClass()
+        self.sub_layout.addWidget( guiClass() )
+        
+        if currentComboIndex == 1:
+            # Set the script job number so we can delete it outside of the
+            # component GUI. The script job can hang around if the main GUI
+            # is closed using the X while the component section is active.
+            componentsToolsUI = self.sub_layout.itemAt( 0 ).widget()
+            self.SCRIPT_JOB_NUMBER = componentsToolsUI.SCRIPT_JOB_NUMBER
         
     def toggle_button_color( self ):
         sender = self.sender()
@@ -131,24 +128,6 @@ class UIRiggingMain( QtGui.QDialog ):
             #sender.setFlat( False )
             sender.setStyleSheet( 'border:3' )
             #sender.setStyleSheet( 'background-color:#616161' )
-    
-    def build_character_gui( self ):
-        propertyStack = QtGui.QVBoxLayout( self )
-        dropList = DropList()
-        self.sub_layout.addWidget( dropList )
-        
-        modules = getModulesByPriority()
-        y = 6
-        for module in modules:
-            print module
-            moduleLabel = '{0}: {1}'.format( module[0], str(module[1]) )
-            dropList.addItem( moduleLabel )
-            
-        setOrderBtn = QtGui.QPushButton()
-        setOrderBtn.setText( 'Set Priority' )
-        setOrderBtn.clicked.connect( lambda a=dropList:self.getListWidgetItems( a ) )
-        
-        self.sub_layout.addWidget( setOrderBtn )
             
     def getListWidgetItems( self, listWidget ):
         itemList = []
@@ -158,159 +137,10 @@ class UIRiggingMain( QtGui.QDialog ):
         print itemList
         return itemList
 
-class DropList( QtGui.QListWidget ):
-    MIME_TYPE = 'application/x-qabstractitemmodeldatalist'
-    
-    def __init__( self, parent=None ):
-        super( DropList, self ).__init__()
-        
-        self.parent = parent
-        
-        self.setStyleSheet('''
-            color:black;
-            background-color:lightgray;
-            border-width:2px;
-            border-style:solid;
-            border-color:black;
-            margin: 2px;''' )
-        
-        self.setAcceptDrops( True )
-        self.setDragEnabled( True )
-        self.setDragDropMode( QtGui.QAbstractItemView.InternalMove )
-    
-    def dropEvent( self, event ):
-        super( DropList, self ).dropEvent( event )
-
-        mimeData = event.mimeData()
-
-        for item in self.selectedItems():
-            print item.text()
-            
-        
-
-
-
-
-
-
-
-class DropFrame( QtGui.QFrame ):
-    def __init__( self, parent=None ):
-        super( DropFrame, self ).__init__( parent )
-        
-        self.setStyleSheet('''
-            background-color:lightgray;
-            border-width:2px;
-            border-style:solid;
-            border-color:black;
-            margin: 2px;''' )
-            
-        self.setAcceptDrops( True )
-        
-    def dragEnterEvent( self, event ):
-        print 'drag event: {0}'.format( event )
-        
-    def dropEvent( self, event ):
-        print 'drop event: {0}'.format( event )
-
-class DragLabel( QtGui.QLabel ):
-    def __init__( self, parent=None ):
-        super( DragLabel, self ).__init__( parent )
-
-        self.setStyleSheet('''
-            background-color: black;
-            color: white;
-            font: bold;
-            padding: 6px;
-            border-width: 2px;
-            border-style: solid;
-            border-radius: 16px;
-            border-color: white;''')
-
-    def mousePressEvent( self, event ):
-        print 'mouse press event: {0}'.format( event )
-    
-import marigold.utility.NodeUtility as NodeUtility
-def getModulesInScenes():
-    '''
-    Finds all module roots in the active scene.
-    '''
-    nodes = cmds.ls( type='network' )
-    nodeList = []
-    for node in nodes:
-        if NodeUtility.attributeCheck( node, 'characterRoot' ):
-            aType = cmds.getAttr( '{0}.classType'.format( node ) )
-            if aType == 'ModuleRootComponent':
-                nodeList.append( node )
-    return nodeList
-
-def sortModules( inModules, inOrder='ascending', renumber=True ):
-    '''
-    Sorts module roots by priority.
-    
-    @param inModules: Dict. Dict of modulename:priorty.
-    @param inOrder: String. Ascending or descending.
-    '''
-    from operator import itemgetter
-    
-    if inOrder == 'ascending':
-        sortedModules = sorted( inModules.iteritems(), key=itemgetter(1) )
-    elif inOrder == 'descending':
-        sortedModules = sorted( inModules.iteritems(), key=itemgetter(1), reverse=True )
-        
-    if renumber:
-        for index, item in enumerate( sortedModules ):
-            sortedModules[index] = [ item[0], index ]
-    return sortedModules
-
-def getModulePriorities( inModules ):
-    '''
-    Gets all the priorities for a list of module roots.
-    
-    @param inModules: List. List of module roots.
-    '''
-    modulesDict = {}
-    for item in inModules:
-        plug = NodeUtility.getPlug( item, 'buildPriority' )
-        plugValue = NodeUtility.getPlugValue( plug )
-        modulesDict[item] = plugValue
-    return modulesDict
-
-def getModulesByPriority( inOrder='ascending' ):
-    '''
-    Gets modules in a scene based on their priority.
-    
-    @param inOrder: String. Ascending or descending.
-    '''
-    modules = getModulesInScenes()
-    modulesWithPriority = getModulePriorities( modules )
-    return sortModules( modulesWithPriority, inOrder )
-
-def getModuleName( inNodeName ):
-    '''
-    Gets a module name from it's node name.
-    
-    @param inNodeName: String. Name of a module root node.
-    '''
-    plug = NodeUtility.getPlug( inNodeName, 'moduleName' )
-    plugValue = NodeUtility.getPlugValue( plug )
-    return plugValue
-
-def getModulePriority( inNodeName ):
-    plug = NodeUtility.getPlug( inNodeName, 'buildPriority' )
-    plugValue = NodeUtility.getPlugValue( plug )
-    return plugValue
-
-
-
-
-
-
-class UICharacterTools( QtGui.QWidget ):        
-    def __init__( self ):
-        super( UICharacterTools, self ).__init__()
-
-
+'''
+@ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
+ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @ @
+'''
 
         
 '''

@@ -34,9 +34,34 @@ def connectNodes( inParentObj, inParentPlug, inChildObj, inChildPlug ):
     parentPlug = getPlug( inParentObj, inParentPlug )
     childPlug = getPlug( inChildObj, inChildPlug )
     MDGMod = OpenMaya.MDGModifier()
-    MDGMod.connect( childPlug, parentPlug )
+    MDGMod.connect( parentPlug, childPlug )
     MDGMod.doIt()
     
+def disconnectNodes( inParentObj, inParentPlug, inChildObj, inChildPlug ):
+    parentPlug = getPlug( inParentObj, inParentPlug )
+    childPlug = getPlug( inChildObj, inChildPlug )
+    MDGMod = OpenMaya.MDGModifier()
+    MDGMod.disconnect( parentPlug, childPlug )
+    MDGMod.doIt()
+
+def getAttrMessageValue( inNode, inAttr ):
+    '''
+    Retrieves the connections to/from a message attribute.
+    
+    @param string inNode: Node with the desired attribute.
+    @param string inAttr: Name of source attribute.
+    @return: String for unicode. String[] for list.
+    '''
+    destCheck = cmds.connectionInfo( '{0}.{1}'.format( inNode, inAttr ), isDestination=True )
+    sourceCheck = cmds.connectionInfo( '{0}.{1}'.format( inNode, inAttr ), isSource=True )
+    if destCheck:
+        attrConnection = cmds.connectionInfo( '{0}.{1}'.format( inNode, inAttr ), sourceFromDestination=True )
+    elif sourceCheck:
+        attrConnection = cmds.connectionInfo( '{0}.{1}'.format( inNode, inAttr ), destinationFromSource=True )
+    else:
+        return None
+    return attrConnection
+
 def getNodeAttrDestination( inNode, inAttr ):
     '''
     Gets the destination of an attribute on the given node.
@@ -46,11 +71,12 @@ def getNodeAttrDestination( inNode, inAttr ):
     @return: Returns list containing the destination attribute and it's node.
     '''        
     attrConnection = cmds.connectionInfo( '{0}.{1}'.format( inNode, inAttr ), destinationFromSource=True )
-    if attrConnection:
-        destInfo = attrConnection[0].split( '.' )
-        return destInfo
-    else:
+    if len( attrConnection ) == 1:
+        return attrConnection[0].split( '.' )
+    elif len( attrConnection ) > 1:
         return attrConnection
+    else:
+        return None
 
 def getNodeAttrSource( inNode, inAttr ):
     '''
@@ -61,11 +87,13 @@ def getNodeAttrSource( inNode, inAttr ):
     @return: Returns list containing the source attribute and it's node.
     '''        
     attrConnection = cmds.connectionInfo( '{0}.{1}'.format( inNode, inAttr ), sourceFromDestination=True )
-    if attrConnection:
+    if not attrConnection:
+        return None
+    elif isinstance( attrConnection, list ):
+        return attrConnection
+    elif isinstance( attrConnection, unicode ):
         destInfo = attrConnection.split( '.' )
         return destInfo
-    else:
-        return attrConnection
 
 def getDependNode( inObj ):
     '''
@@ -547,15 +575,133 @@ def getModuleComponentSettings( inModuleBit ):
     attrList = cmds.listAttr( inModuleBit, userDefined=True )
     returnList = []
     
-    for attrName in attrList:
-        # The attributes come in order from top to bottom.
-        # They also are recursive. So we use that to our advantage.
-        # We only need the attribute names that are used by code.
-        # Any attribute that is just a container for other attributes can be skipped.
-        attrChildren = cmds.attributeQuery( attrName, node=inModuleBit, listChildren=True )
-        
-        if attrChildren is None:
-            # Single attribute.
-            returnList.append( attrName )
-        
+    if attrList is not None:
+        for attrName in attrList:
+            # The attributes come in order from top to bottom.
+            # They also are recursive. So we use that to our advantage.
+            # We only need the attribute names that are used by code.
+            # Any attribute that is just a container for other attributes can be skipped.
+            attrChildren = cmds.attributeQuery( attrName, node=inModuleBit, listChildren=True )
+            
+            if attrChildren is None:
+                # Single attribute.
+                returnList.append( attrName )
+    else:
+        returnList = None
+            
     return returnList
+
+def getCharactersInScene():
+    '''
+    Retrieve a list of all character components in a scene.
+    
+    @return: string[]
+    '''
+    nodes = cmds.ls( type='network' )
+    nodeList = []
+    for node in nodes:
+        if attributeCheck( node, 'modules' ):
+            aType = cmds.getAttr( '{0}.classType'.format( node ) )
+            if aType == 'CharacterRootComponent':
+                nodeList.append( node )
+    return nodeList
+
+def getModulesInScenes():
+    '''
+    Finds all module roots in the active scene.
+    '''
+    nodes = cmds.ls( type='network' )
+    nodeList = []
+    for node in nodes:
+        if attributeCheck( node, 'characterRoot' ):
+            aType = cmds.getAttr( '{0}.classType'.format( node ) )
+            if aType == 'ModuleRootComponent':
+                nodeList.append( node )
+    return nodeList
+
+def sortModules( inModules, inOrder='ascending', renumber=True ):
+    '''
+    Sorts module roots by priority.
+    
+    @param inModules: Dict. Dict of modulename:priorty.
+    @param inOrder: String. Ascending or descending.
+    '''
+    from operator import itemgetter
+    
+    if inOrder == 'ascending':
+        sortedModules = sorted( inModules.iteritems(), key=itemgetter(1) )
+    elif inOrder == 'descending':
+        sortedModules = sorted( inModules.iteritems(), key=itemgetter(1), reverse=True )
+        
+    if renumber:
+        for index, item in enumerate( sortedModules ):
+            sortedModules[index] = [ item[0], index ]
+    return sortedModules
+
+def getModulePriorities( inModules ):
+    '''
+    Gets all the priorities for a list of module roots.
+    
+    @param inModules: List. List of module roots.
+    '''
+    modulesDict = {}
+    for item in inModules:
+        plug = getPlug( item, 'buildPriority' )
+        plugValue = getPlugValue( plug )
+        modulesDict[item] = plugValue
+    return modulesDict
+
+def getModulesByPriority( inOrder='ascending' ):
+    '''
+    Gets modules in a scene based on their priority.
+    
+    @param inOrder: String. Ascending or descending.
+    '''
+    modules = getModulesInScenes()
+    modulesWithPriority = getModulePriorities( modules )
+    return sortModules( modulesWithPriority, inOrder )
+
+def getModuleName( inNodeName ):
+    '''
+    Gets a module name from it's node name.
+    
+    @param inNodeName: String. Name of a module root node.
+    '''
+    plug = getPlug( inNodeName, 'moduleName' )
+    plugValue = getPlugValue( plug )
+    return plugValue
+
+def getModulePriority( inNodeName ):
+    '''
+    Gets the priority number of a module.
+    
+    @param inNodeName: String. Module node name.
+    '''
+    plug = getPlug( inNodeName, 'buildPriority' )
+    plugValue = getPlugValue( plug )
+    return plugValue
+
+def componentCheck( inComponentList, inComponentType ):
+    for component in inComponentList:
+        plug = getPlug( component, 'classType' )
+        plugValue = getPlugValue( plug )
+        if plugValue == inComponentType:
+            return component
+    return None
+
+def checkBitForComponent( inBitName, inComponentName ):
+    '''
+    @param inBitName: String. Bit name.
+    @param inComponentName: String. Name of the component class.
+    @returns: 
+    '''
+    bitComponents = getModuleComponentSettings( inBitName )
+    if bitComponents is not None:
+        for component in bitComponents:
+            plug = getPlug( component, 'classType' )
+            plugValue = getPlugValue( plug )
+            if plugValue == inComponentName:
+                return component
+        return None
+    else:
+        return None

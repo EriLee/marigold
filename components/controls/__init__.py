@@ -38,9 +38,9 @@ def applyStoredTransforms( sourceObj, targetObj ):
     @param sourceObj: String. Name of object to pull data from.
     @param targetObj: String. Name of object to apply data to.
     '''
-    print 'applyStoredTransforms @@@@@@'
-    print 'sourceObj: {0}'.format( sourceObj )
-    print 'targetObj: {0}'.format( targetObj )
+    #print 'applyStoredTransforms @@@@@@'
+    #print 'sourceObj: {0}'.format( sourceObj )
+    #print 'targetObj: {0}'.format( targetObj )
     
     MFnTrans = OpenMaya.MFnTransform()
     targetDagPath = NodeUtility.getDagPath( targetObj )

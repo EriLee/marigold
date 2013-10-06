@@ -87,6 +87,9 @@ def writeModuleXML( inRootObjectName, inModuleType, inModuleName ):
             
             # Get the shape's custom attributes.
             for attr in cmds.listAttr( itemShapeName, multi=True, keyable=True ):
+                
+                types = NodeUtility.getAttrTypes( itemShapeName, attr )
+                
                 if attr.find( '[' ) is not -1:
                     # Special case handle array attributes. The [] needs to be removed so we can get
                     # the base name for the attribute. From there we can then loop through it's children.
@@ -95,7 +98,8 @@ def writeModuleXML( inRootObjectName, inModuleType, inModuleName ):
                     connection = NodeUtility.getNodeAttrSource( itemShapeName, attr )
                     bitChildren = cmds.listRelatives( itemName, type='transform', children=True, fullPath=True )
                     for child in bitChildren:
-                        if child.find( connection[0] ):
+                        childSplit = child.split('|')
+                        if childSplit[-1] == connection[0]:
                             plugValue = child
                     
                     # Now we get the compound attribute's name by removing the index brackets.
@@ -105,15 +109,16 @@ def writeModuleXML( inRootObjectName, inModuleType, inModuleName ):
                     aPlug = NodeUtility.getPlug( itemShapeName, attr )
                     plugValue = NodeUtility.getPlugValue( aPlug )
                     
-                types = NodeUtility.getAttrTypes( itemShapeName, attr )
+                
                 if types[0] is not False:
                     xmlLines.append( '\t\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr, types[0], types[1], plugValue ) )
             # End shape
             xmlLines.append( '\t\t</shape>' )
             
         # BIT COMPONENTS
+        print 'item: {0}'.format( item )
         bitComponents = components.getComponents( item )
-        for comp in bitComponents:
+        for comp in bitComponents:            
             # Component info
             compName = ''.join(i for i in comp if not i.isdigit())
 
@@ -123,8 +128,17 @@ def writeModuleXML( inRootObjectName, inModuleType, inModuleName ):
             compSettings = NodeUtility.getModuleComponentSettings( comp )
             for attr in compSettings:
                 types = NodeUtility.getAttrTypes( comp, attr )
-                aPlug = NodeUtility.getPlug( comp, attr )
-                plugValue = NodeUtility.getPlugValue( aPlug )
+                
+                # Special case message plugs.
+                if types[1] == 'message':
+                    messageValues = NodeUtility.getAttrMessageValue( comp, attr )
+                    if isinstance( messageValues, unicode ):
+                        plugValue = messageValues
+                    elif isinstance( messageValues, list ):
+                        plugValue = None
+                else:
+                    aPlug = NodeUtility.getPlug( comp, attr )
+                    plugValue = NodeUtility.getPlugValue( aPlug )
                 xmlLines.append( '\t\t\t<plug name=\"{0}\" attrType=\"{1}\" attrDataType=\"{2}\">{3}</plug>'.format( attr, types[0], types[1], plugValue ) )
     
             xmlLines.append( '\t\t</component>' )
@@ -250,11 +264,13 @@ def loadModule( inFolder, inFileName ):
             shapeName = cmds.listRelatives( fullBitName, shapes=True )
             fullShapeName = '{0}|{1}'.format( fullBitName, shapeName[0] )
             for plug in shapePlugs:
-                if plug['attrDataType'] == 'TdataCompound':
+                if plug['attrDataType'] == 'TdataCompound' or plug['attrDataType'] == 'matrix':
                     # We skip compound nodes at this stage. They are for the child arrow drawing and must be
                     # hooked up after all the objects are created.
                     connectionChild = '{0}{1}'.format( moduleGroup, plug['value'] )
                     storeBitConnections.append( { 'parent':fullBitName, 'child':connectionChild } )
+                elif plug['attrDataType'] == 'message':
+                    print 'MESSAGE'
                 else:
                     NodeUtility.setPlug( fullShapeName, plug['name'], plug['value'], inAttrDataType=plug['attrDataType'] )
             
@@ -274,10 +290,19 @@ def loadModule( inFolder, inFileName ):
                     newComp = components.addComponentToObject( compType, inObject=fullBitName )
 
                 for plug in comp['plugs']:
-                    NodeUtility.setPlug( newComp.name(), plug['name'], plug['value'], inAttrDataType=plug['attrDataType'] )
+                    # Bit of a hack with the parentName attribute. This attr is setup when the component is created.
+                    # So there is no need to apply the stored plug value from the XML.
+                    if plug['attrDataType'] == 'message':
+                        if plug['name'] != 'parentName':
+                            if plug['value'] != 'None':
+                                sourcePlug = plug['value'].split('.')
+                                NodeUtility.connectNodes( sourcePlug[0], sourcePlug[1], newComp.name(), plug['name'] )
+                    else:
+                        NodeUtility.setPlug( newComp.name(), plug['name'], plug['value'], inAttrDataType=plug['attrDataType'] )
                     
             # Remove the bit from the list
             bits.remove( bits[0] )
+        #tick = tick+1
             
     # Now do the hook ups for the child arrows.
     for i in storeBitConnections:

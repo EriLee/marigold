@@ -37,11 +37,11 @@ def createJoint( inJointName, inJointRef, inJointParent=None, inJointRadius=4.0,
     
     # Set orientation.
     if parentDepNode.name() == 'world':
-        print 'set world euler'
+        #print 'set world euler'
         bitEuler = TransformUtility.getMatrixRotation( bitWorldMatrix, 'euler' )
         jointFn.setOrientation( bitEuler )
     else:
-        print 'set local euler'
+        #print 'set local euler'
         bitEuler = TransformUtility.getMatrixRotation( bitLocalMatrix, 'euler' )                
         jointFn.setOrientation( bitEuler )
     

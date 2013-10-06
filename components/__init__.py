@@ -3,7 +3,7 @@ import maya.cmds as cmds
 import marigold.utility.NodeUtility as NodeUtility
 
 # IMPORT COMPONENTS
-#from BaseComponent import BaseComponent
+from BaseComponent import BaseComponent
 from joints.BasicJoint import BasicJointComponent
 from controls.GLBoxControl import GLBoxControlComponent
 from controls.CurveControl import CurveControlComponent

@@ -21,6 +21,7 @@ class CurveControlComponent( BaseComponent ):
         self.node = node
         super( CurveControlComponent, self ).__init__( node=self.node )
         
+        
     def requiredAttributes( self, *args, **kwargs ):
         '''
         kwargs
@@ -51,7 +52,13 @@ class CurveControlComponent( BaseComponent ):
         
         # Clean up.
         cmds.delete( tempCurveName )
+
     
+    @property
+    def controlName( self ):
+        return cmds.getAttr( '{0}.controlName'.format( self.node ) )
+    
+        
     @property
     def curveType( self ):
         '''
@@ -61,6 +68,59 @@ class CurveControlComponent( BaseComponent ):
         '''
         if cmds.attributeQuery( 'curveType', node=self.node, exists=True ):
             return cmds.getAttr( '{0}.curveType'.format( self.node ) )
+        
+
+    @property
+    def controlColor( self ):
+        return cmds.getAttr( '{0}.controlColor'.format( self.node ) )
+    
+    
+    @property
+    def controlPosition( self ):
+        sourcePosPlug = NodeUtility.getPlug( 'CurveControlComponent1', 'controlPosition' )
+        return NodeUtility.getPlugValue( sourcePosPlug )
+    
+    
+    @property
+    def controlRotation( self ):
+        sourcePosPlug = NodeUtility.getPlug( 'CurveControlComponent1', 'controlRotation' )
+        return NodeUtility.getPlugValue( sourcePosPlug )
+        
+        
+    @property
+    def controlScale( self ):
+        sourcePosPlug = NodeUtility.getPlug( 'CurveControlComponent1', 'controlScale' )
+        return NodeUtility.getPlugValue( sourcePosPlug )
+    
+    
+    @classmethod
+    def buildNode( cls, nodeName ):
+        '''
+        Builds a curve control.
+        
+        @param nodeName: String. Name of the node.
+        '''        
+        # Create the curve.
+        curveNode = CurveControlComponent( nodeName ).createCurveControl( cls( nodeName ).controlName, cls( nodeName ).curveType )
+        controlName = OpenMaya.MDagPath.getAPathTo( curveNode ).fullPathName()
+        
+        # Set the control to the transform matrix.
+        applyStoredTransforms( nodeName, controlName )
+        
+        # Get the saved properties and apply them to the curve.
+        cvList = NurbsCurveUtility.readCurveValues( nodeName )
+        cvPointArray = NurbsCurveUtility.buildCVPointArray( cvList )
+        NurbsCurveUtility.setCurveCvs( controlName, cvPointArray )
+        
+        # Color.
+        GeneralUtility.setUserColor( controlName, userColor=cls( nodeName ).controlColor )
+        
+        # Create the control spacer.
+        transReference = NodeUtility.getNodeAttrSource( nodeName, 'parentName' )
+        controlSpacer = GeneralUtility.createSpacer( None, inGroupName=cls( nodeName ).controlName, inTargetObject=transReference[0], inDoParent=False, inPrefix='sp' )
+        cmds.parent( controlName, controlSpacer, relative=True )
+        return curveNode
+
         
     def createCurveControl( self, inName, inShape ):
         '''

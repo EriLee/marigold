@@ -46,6 +46,9 @@ displayRGBColor -c userDefined6 0.189 0.4051 0.63;
 displayRGBColor -c userDefined7 0.43596 0.189 0.63;
 displayRGBColor -c userDefined8 0.63 0.189 0.41391;
 '''
+
+        
+
 def addMatrixAttr( targetObj, attrName ):
     mObj = NodeUtility.getDependNode( targetObj )
     dgModifier = OpenMaya.MDGModifier()
@@ -55,228 +58,856 @@ def addMatrixAttr( targetObj, attrName ):
     dgModifier.addAttribute( mObj, controlMatrix )
     dgModifier.doIt()
         
-def getModulePriorities( inModules ):
-    '''
-    Gets all the priorities for a list of module roots.
-    
-    @param inModules: List. List of module roots.
-    '''
-    modulesDict = {}
-    for item in inModules:
-        plug = NodeUtility.getPlug( item, 'buildPriority' )
-        plugValue = NodeUtility.getPlugValue( plug )
-        modulesDict[item] = plugValue
-    return modulesDict
-
-def sortModules( inModules, inOrder='ascending', renumber=True ):
-    '''
-    Sorts module roots by priority.
-    
-    @param inModules: Dict. Dict of modulename:priorty.
-    @param inOrder: String. Ascending or descending.
-    '''
-    from operator import itemgetter
-    
-    if inOrder == 'ascending':
-        sortedModules = sorted( inModules.iteritems(), key=itemgetter(1) )
-    elif inOrder == 'descending':
-        sortedModules = sorted( inModules.iteritems(), key=itemgetter(1), reverse=True )
-        
-    if renumber:
-        for index, item in enumerate( sortedModules ):
-            sortedModules[index] = [ item[0], index ]
-    return sortedModules
 
 #========================
 
-def getCharactersInScene():
-    nodes = cmds.ls( type='network' )
-    nodeList = []
-    for node in nodes:
-        if NodeUtility.attributeCheck( node, 'modules' ):
-            aType = cmds.getAttr( '{0}.classType'.format( node ) )
-            if aType == 'CharacterRootComponent':
-                nodeList.append( node )
-    return nodeList
+AISEnvFacade
+AlembicNode
+ComputeGlobal
+ComputeLocal
+ControlBox
+ControlBoxManip
+CustomRigDefaultMappingNode
+CustomRigRetargeterNode
+HIKCharacterNode
+HIKCharacterStateClient
+HIKControlSetNode
+HIKEffector2State
+HIKEffectorFromCharacter
+HIKFK2State
+HIKPinning2State
+HIKProperty2State
+HIKRetargeterNode
+HIKSK2State
+HIKSkeletonGeneratorNode
+HIKSolverNode
+HIKState2Effector
+HIKState2FK
+HIKState2GlobalSK
+HIKState2SK
+addDoubleLinear
+addMatrix
+adskMaterial
+adskPrepareRenderGlobals
+aimConstraint
+airField
+airManip
+alignCurve
+alignManip
+alignSurface
+ambientLight
+angleBetween
+angleDimension
+animBlend
+animBlendInOut
+animBlendNodeAdditive
+animBlendNodeAdditiveDA
+animBlendNodeAdditiveDL
+animBlendNodeAdditiveF
+animBlendNodeAdditiveFA
+animBlendNodeAdditiveFL
+animBlendNodeAdditiveI16
+animBlendNodeAdditiveI32
+animBlendNodeAdditiveRotation
+animBlendNodeAdditiveScale
+animBlendNodeBoolean
+animBlendNodeEnum
+animBlendNodeTime
+animClip
+animCurveTA
+animCurveTL
+animCurveTT
+animCurveTU
+animCurveUA
+animCurveUL
+animCurveUT
+animCurveUU
+animLayer
+anisotropic
+annotationShape
+apfEntityNode
+apfFileNode
+arcLengthDimension
+areaLight
+arrayMapper
+arrowManip
+assemblyDefinition
+assemblyReference
+attachCurve
+attachSurface
+attrHierarchyTest
+audio
+avgCurves
+avgCurvesManip
+avgNurbsSurfacePoints
+avgSurfacePoints
+axesActionManip
+ballProjManip
+barnDoorManip
+baseLattice
+bevel
+bevelManip
+bevelPlus
+bezierCurve
+bezierCurveToNurbs
+blendColorSets
+blendColors
+blendDevice
+blendManip
+blendShape
+blendTwoAttr
+blendWeighted
+blindDataTemplate
+blinn
+boneLattice
+boolean
+boundary
+brownian
+brush
+bulge
+bump2d
+bump3d
+buttonManip
+cMuscleCreator
+cMuscleDebug
+cMuscleDirection
+cMuscleDisplace
+cMuscleDisplay
+cMuscleFalloff
+cMuscleKeepOut
+cMuscleMultiCollide
+cMuscleObject
+cMuscleRelative
+cMuscleShader
+cMuscleSmartCollide
+cMuscleSmartConstraint
+cMuscleSpline
+cMuscleSplineDeformer
+cMuscleStretch
+cMuscleSurfAttach
+cMuscleSystem
+cacheBlend
+cacheFile
+camera
+cameraManip
+cameraPlaneManip
+cameraSet
+cameraView
+centerManip
+character
+characterMap
+characterOffset
+checker
+choice
+chooser
+circleManip
+circleSweepManip
+clamp
+clipGhostShape
+clipLibrary
+clipScheduler
+clipToGhostData
+closeCurve
+closeSurface
+closestPointOnMesh
+closestPointOnSurface
+cloth
+cloud
+cluster
+clusterFlexorShape
+clusterHandle
+coiManip
+collisionModel
+colorProfile
+componentManip
+composeMatrix
+concentricProjManip
+condition
+container
+containerBase
+contrast
+copyColorSet
+copyUVSet
+cpManip
+crater
+creaseSet
+createBPManip
+createCVManip
+createColorSet
+createEPManip
+createUVSet
+cubeManip
+cubicProjManip
+curveEdManip
+curveFromMeshCoM
+curveFromMeshEdge
+curveFromSubdivEdge
+curveFromSubdivFace
+curveFromSurfaceBnd
+curveFromSurfaceCoS
+curveFromSurfaceIso
+curveInfo
+curveIntersect
+curveNormalizerAngle
+curveNormalizerLinear
+curveSegmentManip
+curveVarGroup
+cylindricalProjManip
+dagContainer
+dagPose
+dataBlockTest
+decomposeMatrix
+defaultLightList
+defaultRenderUtilityList
+defaultRenderingList
+defaultShaderList
+defaultTextureList
+deformBend
+deformBendManip
+deformFlare
+deformFlareManip
+deformSine
+deformSineManip
+deformSquash
+deformSquashManip
+deformTwist
+deformTwistManip
+deformWave
+deformWaveManip
+deleteColorSet
+deleteComponent
+deleteUVSet
+detachCurve
+detachSurface
+directedDisc
+directionManip
+directionalLight
+discManip
+diskCache
+displacementShader
+displayLayer
+displayLayerManager
+distanceBetween
+distanceDimShape
+distanceManip
+dof
+dofManip
+doubleShadingSwitch
+dpBirailSrf
+dragField
+dropoffLocator
+dropoffManip
+dynAttenuationManip
+dynController
+dynGlobals
+dynHolder
+dynSpreadManip
+dynamicConstraint
+editMetadata
+emitterManip
+enableManip
+envBall
+envChrome
+envCube
+envFacade
+envFog
+envSky
+envSphere
+environmentFog
+eulerToQuat
+explodeNurbsShell
+expression
+extendCurve
+extendCurveDistanceManip
+extendSurface
+extendSurfaceDistanceManip
+extrude
+extrudeManip
+facade
+ffBlendSrf
+ffBlendSrfObsolete
+ffFilletSrf
+ffd
+fieldManip
+fieldsManip
+file
+filletCurve
+fitBspline
+flexorShape
+flow
+fluidEmitter
+fluidShape
+fluidSliceManip
+fluidTexture2D
+fluidTexture3D
+follicle
+forceUpdateManip
+fosterParent
+fourByFourMatrix
+fractal
+frameCache
+freePointManip
+freePointTriadManip
+gammaCorrect
+geoConnectable
+geoConnector
+geometryConstraint
+geometryFilter
+geometryOnLineManip
+geometryVarGroup
+glBox
+glCone
+glCylinder
+glSphere
+glTorus
+globalCacheControl
+globalStitch
+gpuCache
+granite
+gravityField
+greasePencilSequence
+greasePlane
+greasePlaneRenderShape
+grid
+groupId
+groupParts
+guide
+hairConstraint
+hairSystem
+hairTubeShader
+hardenPoint
+hardwareRenderGlobals
+hardwareRenderingGlobals
+heightField
+hierarchyTestNode1
+hierarchyTestNode2
+hierarchyTestNode3
+hikEffector
+hikFKJoint
+hikFloorContactMarker
+hikGroundPlane
+hikHandle
+hikIKEffector
+hikSolver
+historySwitch
+holdMatrix
+hsvToRgb
+hwReflectionMap
+hwRenderGlobals
+hyperGraphInfo
+hyperLayout
+hyperView
+ik2Bsolver
+ikEffector
+ikHandle
+ikMCsolver
+ikPASolver
+ikRPManip
+ikRPsolver
+ikSCsolver
+ikSplineManip
+ikSplineSolver
+ikSpringSolver
+ikSystem
+imagePlane
+implicitBox
+implicitCone
+implicitSphere
+indexManip
+insertKnotCurve
+insertKnotSurface
+instancer
+intersectSurface
+inverseMatrix
+isoparmManip
+jiggle
+joint
+jointCluster
+jointClusterManip
+jointFfd
+jointLattice
+jointTranslateManip
+keyframeRegionManip
+keyingGroup
+lambert
+lattice
+layeredShader
+layeredTexture
+leastSquaresModifier
+leather
+lightFog
+lightInfo
+lightLinker
+lightList
+lightManip
+limitManip
+lineManip
+lineModifier
+locator
+lodGroup
+lodThresholds
+loft
+lookAt
+luminance
+makeGroup
+makeIllustratorCurves
+makeNurbCircle
+makeNurbCone
+makeNurbCube
+makeNurbCylinder
+makeNurbPlane
+makeNurbSphere
+makeNurbTorus
+makeNurbsSquare
+makeTextCurves
+makeThreePointCircularArc
+makeThreePointCircularArcManip
+makeTwoPointCircularArc
+makeTwoPointCircularArcManip
+mandelbrot
+mandelbrot3D
+manip2DContainer
+manipContainer
+marble
+markerManip
+materialFacade
+materialInfo
+membrane
+mentalrayTexture
+mesh
+meshVarGroup
+motionPath
+motionPathManip
+motionTrail
+motionTrailShape
+mountain
+moveBezierHandleManip
+moveVertexManip
+movie
+mpBirailSrf
+multDoubleLinear
+multMatrix
+multilisterLight
+multiplyDivide
+mute
+nCloth
+nComponent
+nParticle
+nRigid
+nearestPointOnCurve
+network
+newtonField
+newtonManip
+nexManip
+noise
+nonLinear
+normalConstraint
+nucleus
+nurbsCurve
+nurbsCurveToBezier
+nurbsSurface
+nurbsTessellate
+nurbsToSubdiv
+nurbsToSubdivProc
+objectAttrFilter
+objectBinFilter
+objectFilter
+objectMultiFilter
+objectNameFilter
+objectRenderFilter
+objectScriptFilter
+objectSet
+objectTypeFilter
+ocean
+oceanShader
+offsetCos
+offsetCosManip
+offsetCurve
+offsetCurveManip
+offsetSurface
+offsetSurfaceManip
+oldBlindDataBase
+oldGeometryConstraint
+oldNormalConstraint
+oldTangentConstraint
+opticalFX
+orientConstraint
+orientationMarker
+pairBlend
+paramDimension
+parentConstraint
+particle
+particleAgeMapper
+particleCloud
+particleColorMapper
+particleIncandMapper
+particleSamplerInfo
+particleTranspMapper
+partition
+passContributionMap
+passMatrix
+pfxHair
+pfxToon
+phong
+phongE
+pivot2dManip
+pivotAndOrientManip
+place2dTexture
+place3dTexture
+planarProjManip
+planarTrimSurface
+plusMinusAverage
+pointConstraint
+pointEmitter
+pointLight
+pointMatrixMult
+pointOnCurveInfo
+pointOnCurveManip
+pointOnLineManip
+pointOnPolyConstraint
+pointOnSurfManip
+pointOnSurfaceInfo
+pointOnSurfaceManip
+poleVectorConstraint
+polyAppend
+polyAppendVertex
+polyAutoProj
+polyAutoProjManip
+polyAverageVertex
+polyBevel
+polyBlindData
+polyBoolOp
+polyBridgeEdge
+polyChipOff
+polyCloseBorder
+polyCollapseEdge
+polyCollapseF
+polyColorDel
+polyColorMod
+polyColorPerVertex
+polyCone
+polyConnectComponents
+polyCopyUV
+polyCrease
+polyCreaseEdge
+polyCreateFace
+polyCreateToolManip
+polyCube
+polyCut
+polyCutManip
+polyCutManipContainer
+polyCylProj
+polyCylinder
+polyDelEdge
+polyDelFacet
+polyDelVertex
+polyDuplicateEdge
+polyEdgeToCurve
+polyEditEdgeFlow
+polyExtrudeEdge
+polyExtrudeFace
+polyExtrudeManip
+polyExtrudeManipContainer
+polyExtrudeVertex
+polyFlipEdge
+polyFlipUV
+polyHelix
+polyHoleFace
+polyLayoutUV
+polyMapCut
+polyMapDel
+polyMapSew
+polyMapSewMove
+polyMappingManip
+polyMergeEdge
+polyMergeFace
+polyMergeUV
+polyMergeVert
+polyMergeVertsManip
+polyMirror
+polyModifierManip
+polyMoveEdge
+polyMoveFace
+polyMoveFacetUV
+polyMoveUV
+polyMoveUVManip
+polyMoveVertex
+polyMoveVertexManip
+polyNormal
+polyNormalPerVertex
+polyNormalizeUV
+polyOptUvs
+polyPipe
+polyPlanarProj
+polyPlane
+polyPlatonicSolid
+polyPoke
+polyPokeManip
+polyPrimitiveMisc
+polyPrism
+polyProj
+polyProjManip
+polyProjectCurve
+polyPyramid
+polyQuad
+polyReduce
+polySelectEditFeedbackManip
+polySeparate
+polySewEdge
+polySmooth
+polySmoothFace
+polySmoothProxy
+polySoftEdge
+polySphProj
+polySphere
+polySpinEdge
+polySplit
+polySplitEdge
+polySplitRing
+polySplitToolManip1
+polySplitVert
+polyStraightenUVBorder
+polySubdEdge
+polySubdFace
+polyToSubdiv
+polyToolFeedbackManip
+polyTorus
+polyTransfer
+polyTriangulate
+polyTweak
+polyTweakUV
+polyUVRectangle
+polyUnite
+polyVertexNormalManip
+polyWedgeFace
+positionMarker
+postProcessList
+precompExport
+projectCurve
+projectTangent
+projectTangentManip
+projection
+projectionManip
+projectionMultiManip
+projectionUVManip
+propModManip
+propMoveTriadManip
+proxyManager
+psdFileTex
+quadPtOnLineManip
+quadShadingSwitch
+quatAdd
+quatConjugate
+quatInvert
+quatNegate
+quatNormalize
+quatProd
+quatSub
+quatToEuler
+radialField
+ramp
+rampShader
+rbfSrf
+rbfSrfManip
+rebuildCurve
+rebuildSurface
+record
+reference
+remapColor
+remapHsv
+remapValue
+renderBox
+renderCone
+renderGlobals
+renderGlobalsList
+renderLayer
+renderLayerManager
+renderPass
+renderPassSet
+renderQuality
+renderRect
+renderSphere
+renderTarget
+renderedImageSource
+resolution
+resultCurveTimeToAngular
+resultCurveTimeToLinear
+resultCurveTimeToTime
+resultCurveTimeToUnitless
+reverse
+reverseCurve
+reverseCurveManip
+reverseSurface
+reverseSurfaceManip
+revolve
+revolveManip
+revolvedPrimitiveManip
+rgbToHsv
+rigidBody
+rigidConstraint
+rigidSolver
+rock
+rotateHelper
+rotateLimitsManip
+rotateManip
+rotateUV2dManip
+roundConstantRadius
+roundConstantRadiusManip
+roundRadiusCrvManip
+roundRadiusManip
+sampler
+samplerInfo
+scaleConstraint
+scaleLimitsManip
+scaleManip
+scaleUV2dManip
+screenAlignedCircleManip
+script
+scriptManip
+sculpt
+selectionListOperator
+sequenceManager
+sequencer
+setRange
+shaderGlow
+shadingEngine
+shadingMap
+shellTessellate
+shot
+simpleTestNode
+simpleVolumeShader
+singleShadingSwitch
+sketchPlane
+skinBinding
+skinCluster
+smoothCurve
+smoothTangentSrf
+snapshot
+snapshotShape
+snow
+softMod
+softModHandle
+softModManip
+solidFractal
+spBirailSrf
+sphericalProjManip
+spotCylinderManip
+spotLight
+spotManip
+spring
+squareSrf
+squareSrfManip
+stencil
+stereoRigCamera
+stitchAsNurbsShell
+stitchSrf
+stitchSrfManip
+stroke
+strokeGlobals
+stucco
+styleCurve
+subCurve
+subSurface
+subdAddTopology
+subdAutoProj
+subdBlindData
+subdCleanTopology
+subdHierBlind
+subdLayoutUV
+subdMapCut
+subdMapSewMove
+subdMappingManip
+subdPlanarProj
+subdProjManip
+subdTweak
+subdTweakUV
+subdiv
+subdivCollapse
+subdivComponentId
+subdivReverseFaces
+subdivSurfaceVarGroup
+subdivToNurbs
+subdivToPoly
+substance
+substanceOutput
+surfaceEdManip
+surfaceInfo
+surfaceLuminance
+surfaceShader
+surfaceVarGroup
+symmetryConstraint
+tangentConstraint
+texLattice
+texLatticeDeformManip
+texMoveShellManip
+texSmoothManip
+texSmudgeUVManip
+textButtonManip
+textManip2D
+texture3dManip
+textureBakeSet
+textureToGeom
+time
+timeFunction
+timeToUnitConversion
+timeWarp
+toggleManip
+toggleOnLineManip
+toolDrawManip
+toolDrawManip2D
+toonLineAttributes
+towPointOnCurveManip
+towPointOnSurfaceManip
+trans2dManip
+transUV2dManip
+transferAttributes
+transform
+transformGeometry
+translateLimitsManip
+translateManip
+translateUVManip
+transposeMatrix
+trim
+trimManip
+trimWithBoundaries
+triplanarProjManip
+tripleShadingSwitch
+trsInsertManip
+trsManip
+turbulenceField
+turbulenceManip
+tweak
+uniformField
+unitConversion
+unitToTimeConversion
+unknown
+unknownDag
+unknownTransform
+untrim
+useBackground
+uv2dManip
+uvChooser
+vectorProduct
+vectorRenderGlobals
+vertexBakeSet
+viewColorManager
+volumeAxisField
+volumeBindManip
+volumeFog
+volumeLight
+volumeNoise
+volumeShader
+vortexField
+water
+weightGeometryFilter
+wire
+wood
+wrap
+writeToColorBuffer
+writeToDepthBuffer
+writeToLabelBuffer
+writeToVectorBuffer
+wtAddMatrix
+xformManip
 
-def componentCheck( inComponentList, inComponentType ):
-    for component in inComponentList:
-        plug = NodeUtility.getPlug( component, 'classType' )
-        plugValue = NodeUtility.getPlugValue( plug )
-        if plugValue == inComponentType:
-            return component
-    return None
 
-def createSpacer( inBitName, inGroupName='newGroup', inTargetObject=None, inDoParent=False, inPrefix=None ):
-        '''
-        Creates an empty group. Optionally, the group's transforms can be matched to
-        another object.
-        
-        @param inGroupName: String. Name to give the new group.
-        @param inTargetObject: String. Name of object to match the group's transforms
-        to.
-        @return: The newly created group.
-        '''
-        # Create empty group.
-        if inPrefix is not None:
-            groupName = inPrefix+'_'+inGroupName
-        else:
-            groupName = inGroupName
-            
-        newGroup = cmds.group( em=True, name=groupName )
-    
-        # Set its transforms.
-        if inTargetObject is not None:
-            # Get target objects matrix.
-            targetMatrix = TransformUtility.getMatrix( inTargetObject, 'worldMatrix' )
-            
-            # Get groups transform.
-            MFnTrans = OpenMaya.MFnTransform()
-            groupDagPath = NodeUtility.getDagPath( newGroup )
-            MFnTrans.setObject( groupDagPath )
-            
-            # Apply the targets translation to the group.
-            targetTranslation = TransformUtility.getMatrixTranslation( targetMatrix, OpenMaya.MSpace.kWorld )
-            MFnTrans.setTranslation( targetTranslation, OpenMaya.MSpace.kWorld )
-            
-            # Apply the targets rotation to the group.         
-            targetRotation = TransformUtility.getMatrixRotation( targetMatrix, 'quat' )
-            MFnTrans.setRotation( targetRotation, OpenMaya.MSpace.kWorld )
-            
-            # Parent the spacer.
-            if inDoParent:
-                parent = cmds.listRelatives( inBitName, parent=True )
-                if NodeUtility.attributeCheck( parent[0], 'controlName' ):
-                    parentControl = NodeUtility.getFrameBitSettings( parent[0] )[ 'controlName' ]
-                    cmds.parent( newGroup, parentControl, absolute=True )
-                    
-        return newGroup    
-    
-def buildCharacter( inCharacter ):
-    '''
-    Build order:
-        1) Joints
-        2) Control Spacers
-        3) Controls
-        4) Deformers and Dependencies
-    '''
-    print 'BUILDING: {0}'.format( inCharacter )
-    
-    # Get the character modules.
-    characterConnections = cmds.connectionInfo( '{0}.{1}'.format( inCharacter, 'modules' ), destinationFromSource=True )
-    characterModules = []
-    for module in characterConnections:
-        splitName = module.split( '.' )
-        characterModules.append( splitName[0] )
-        
-    # Sort modules by priority.
-    modulePriorities = getModulePriorities( characterModules )
-    sortedModules = sortModules( modulePriorities, 'ascending' )
-    
-    rootBits = []
-    for module in sortedModules:
-        moduleName = module[0]
-        rootBit = NodeUtility.getNodeAttrSource( moduleName, 'parentName' )
-        rootBits.append( rootBit[0] )
-    
-    # BUILDING: JOINTS
-    for root in rootBits:
-        # Check the root bit for a joint component.
-        rootComponents = NodeUtility.getModuleComponentSettings( root )
-        jointCheck = componentCheck( rootComponents, 'BasicJointComponent' )
-        if jointCheck is not None:
-            # Make the joint.
-            Components.BasicJointComponent( jointCheck ).buildNode( jointCheck )
-        rootChildren = NodeUtility.getFrameRootAllChildren( root )
-        if rootChildren is not None:
-            # Check the children bits for a joint component.
-            for child in rootChildren:
-                childComponents = NodeUtility.getModuleComponentSettings( child )
-                jointCheck = componentCheck( childComponents, 'BasicJointComponent' )
-                if jointCheck is not None:
-                    # Make the joint.
-                    childJoint = Components.BasicJointComponent( jointCheck ).buildNode( jointCheck )
-                    childJointName = GeneralUtility.getMObjectName( childJoint )
-                    childParent = NodeUtility.cleanParentFullName( child )
-                    parentComponents = NodeUtility.getModuleComponentSettings( childParent )
-                    childParentJointComponent = componentCheck( parentComponents, 'BasicJointComponent' )
-                    childParentJoint = cmds.getAttr( '{0}.jointName'.format( childParentJointComponent ) )
-                    cmds.parent( childJointName, childParentJoint )
-    
-    # BUILDING: CONTROLS
-    for root in rootBits:
-        print 'CONTROL: {0}'.format( root )
-        # Check the root bit for a control component.
-        rootComponents = NodeUtility.getModuleComponentSettings( root )
-        controlCheck = componentCheck( rootComponents, 'CurveControlComponent' )
-        if controlCheck is not None:
-                # Make the spacer.
-                controlName = cmds.getAttr( '{0}.controlName'.format( controlCheck ) )
-                controlSpacer = createSpacer( None, inGroupName=controlName, inTargetObject=root, inDoParent=False, inPrefix='sp' )
-                
-                # Make the control.
-                curveType = Components.CurveControlComponent( controlCheck ).curveType
-                curve = Components.CurveControlComponent( controlCheck ).createCurveControl( controlName, curveType )
-                controlName = OpenMaya.MDagPath.getAPathTo( curve ).fullPathName()
-                
-                # Parent
-                cmds.parent( controlName, controlSpacer )
-                controlName = OpenMaya.MDagPath.getAPathTo( curve ).fullPathName()
-                
-                # Set the control to the transform matrix.
-                Components.controls.applyStoredTransforms( controlCheck, controlName )
-                
-                # Get the saved properties and apply them to the curve.
-                cvList = NurbsCurveUtility.readCurveValues( controlCheck )
-                cvPointArray = NurbsCurveUtility.buildCVPointArray( cvList )
-                NurbsCurveUtility.setCurveCvs( controlName, cvPointArray )
-                
-                # Color.
-                controlColor = cmds.getAttr( '{0}.controlColor'.format( controlCheck ) )
-                GeneralUtility.setUserColor( controlName, userColor=controlColor )
-                
-        # Do it for the children.
-        rootChildren = NodeUtility.getFrameRootAllChildren( root )
-        if rootChildren is not None:
-            for child in rootChildren:
-                childComponents = NodeUtility.getModuleComponentSettings( child )
-                controlCheck = componentCheck( childComponents, 'CurveControlComponent' )
-                if controlCheck is not None:
-                    # Make the spacer.
-                    controlName = cmds.getAttr( '{0}.controlName'.format( controlCheck ) )
-                    controlSpacer = createSpacer( None, inGroupName=controlName, inTargetObject=child, inDoParent=False, inPrefix='sp' )
-                    spacerMObject = NodeUtility.getDependNode( controlSpacer )
-                    
-                    # Make the control.
-                    curveType = Components.CurveControlComponent( controlCheck ).curveType
-                    curve = Components.CurveControlComponent( controlCheck ).createCurveControl( controlName, curveType )
-                    controlName = OpenMaya.MDagPath.getAPathTo( curve ).fullPathName()
-                    
-                    # Parent
-                    cmds.parent( controlName, controlSpacer )
-                    controlName = OpenMaya.MDagPath.getAPathTo( curve ).fullPathName()
-                    
-                    # Set the control to the transform matrix.
-                    Components.controls.applyStoredTransforms( controlCheck, controlName )
-                    
-                    # Get the saved properties and apply them to the curve.
-                    cvList = NurbsCurveUtility.readCurveValues( controlCheck )
-                    cvPointArray = NurbsCurveUtility.buildCVPointArray( cvList )
-                    NurbsCurveUtility.setCurveCvs( controlName, cvPointArray )
-                    
-                    # Color.
-                    controlColor = cmds.getAttr( '{0}.controlColor'.format( controlCheck ) )
-                    GeneralUtility.setUserColor( controlName, userColor=controlColor )
-                    
-                    '''
-                    # Parent the spacer.
-                    childParent = NodeUtility.cleanParentFullName( child )
-                    parentComponents = NodeUtility.getModuleComponentSettings( childParent )
-                    childParentControlComponent = componentCheck( parentComponents, 'CurveControlComponent' )
-                    childParentControl = cmds.getAttr( '{0}.controlName'.format( childParentControlComponent ) )
-                    parentSpacerName = 'sp_{0}'.format( childParentControl )
-                    cmds.parent( childJointName, parentSpacerName )
-                    '''
-
-characters = getCharactersInScene()
-buildCharacter( characters[0] )
