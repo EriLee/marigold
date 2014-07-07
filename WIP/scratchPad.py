@@ -60,854 +60,151 @@ def addMatrixAttr( targetObj, attrName ):
         
 
 #========================
+import maya.OpenMayaUI as omui
+from PySide import QtCore
+from PySide import QtGui
+from shiboken import wrapInstance
+import maya.cmds as cmds
+import marigold.ui.qtui_resources
 
-AISEnvFacade
-AlembicNode
-ComputeGlobal
-ComputeLocal
-ControlBox
-ControlBoxManip
-CustomRigDefaultMappingNode
-CustomRigRetargeterNode
-HIKCharacterNode
-HIKCharacterStateClient
-HIKControlSetNode
-HIKEffector2State
-HIKEffectorFromCharacter
-HIKFK2State
-HIKPinning2State
-HIKProperty2State
-HIKRetargeterNode
-HIKSK2State
-HIKSkeletonGeneratorNode
-HIKSolverNode
-HIKState2Effector
-HIKState2FK
-HIKState2GlobalSK
-HIKState2SK
-addDoubleLinear
-addMatrix
-adskMaterial
-adskPrepareRenderGlobals
-aimConstraint
-airField
-airManip
-alignCurve
-alignManip
-alignSurface
-ambientLight
-angleBetween
-angleDimension
-animBlend
-animBlendInOut
-animBlendNodeAdditive
-animBlendNodeAdditiveDA
-animBlendNodeAdditiveDL
-animBlendNodeAdditiveF
-animBlendNodeAdditiveFA
-animBlendNodeAdditiveFL
-animBlendNodeAdditiveI16
-animBlendNodeAdditiveI32
-animBlendNodeAdditiveRotation
-animBlendNodeAdditiveScale
-animBlendNodeBoolean
-animBlendNodeEnum
-animBlendNodeTime
-animClip
-animCurveTA
-animCurveTL
-animCurveTT
-animCurveTU
-animCurveUA
-animCurveUL
-animCurveUT
-animCurveUU
-animLayer
-anisotropic
-annotationShape
-apfEntityNode
-apfFileNode
-arcLengthDimension
-areaLight
-arrayMapper
-arrowManip
-assemblyDefinition
-assemblyReference
-attachCurve
-attachSurface
-attrHierarchyTest
-audio
-avgCurves
-avgCurvesManip
-avgNurbsSurfacePoints
-avgSurfacePoints
-axesActionManip
-ballProjManip
-barnDoorManip
-baseLattice
-bevel
-bevelManip
-bevelPlus
-bezierCurve
-bezierCurveToNurbs
-blendColorSets
-blendColors
-blendDevice
-blendManip
-blendShape
-blendTwoAttr
-blendWeighted
-blindDataTemplate
-blinn
-boneLattice
-boolean
-boundary
-brownian
-brush
-bulge
-bump2d
-bump3d
-buttonManip
-cMuscleCreator
-cMuscleDebug
-cMuscleDirection
-cMuscleDisplace
-cMuscleDisplay
-cMuscleFalloff
-cMuscleKeepOut
-cMuscleMultiCollide
-cMuscleObject
-cMuscleRelative
-cMuscleShader
-cMuscleSmartCollide
-cMuscleSmartConstraint
-cMuscleSpline
-cMuscleSplineDeformer
-cMuscleStretch
-cMuscleSurfAttach
-cMuscleSystem
-cacheBlend
-cacheFile
-camera
-cameraManip
-cameraPlaneManip
-cameraSet
-cameraView
-centerManip
-character
-characterMap
-characterOffset
-checker
-choice
-chooser
-circleManip
-circleSweepManip
-clamp
-clipGhostShape
-clipLibrary
-clipScheduler
-clipToGhostData
-closeCurve
-closeSurface
-closestPointOnMesh
-closestPointOnSurface
-cloth
-cloud
-cluster
-clusterFlexorShape
-clusterHandle
-coiManip
-collisionModel
-colorProfile
-componentManip
-composeMatrix
-concentricProjManip
-condition
-container
-containerBase
-contrast
-copyColorSet
-copyUVSet
-cpManip
-crater
-creaseSet
-createBPManip
-createCVManip
-createColorSet
-createEPManip
-createUVSet
-cubeManip
-cubicProjManip
-curveEdManip
-curveFromMeshCoM
-curveFromMeshEdge
-curveFromSubdivEdge
-curveFromSubdivFace
-curveFromSurfaceBnd
-curveFromSurfaceCoS
-curveFromSurfaceIso
-curveInfo
-curveIntersect
-curveNormalizerAngle
-curveNormalizerLinear
-curveSegmentManip
-curveVarGroup
-cylindricalProjManip
-dagContainer
-dagPose
-dataBlockTest
-decomposeMatrix
-defaultLightList
-defaultRenderUtilityList
-defaultRenderingList
-defaultShaderList
-defaultTextureList
-deformBend
-deformBendManip
-deformFlare
-deformFlareManip
-deformSine
-deformSineManip
-deformSquash
-deformSquashManip
-deformTwist
-deformTwistManip
-deformWave
-deformWaveManip
-deleteColorSet
-deleteComponent
-deleteUVSet
-detachCurve
-detachSurface
-directedDisc
-directionManip
-directionalLight
-discManip
-diskCache
-displacementShader
-displayLayer
-displayLayerManager
-distanceBetween
-distanceDimShape
-distanceManip
-dof
-dofManip
-doubleShadingSwitch
-dpBirailSrf
-dragField
-dropoffLocator
-dropoffManip
-dynAttenuationManip
-dynController
-dynGlobals
-dynHolder
-dynSpreadManip
-dynamicConstraint
-editMetadata
-emitterManip
-enableManip
-envBall
-envChrome
-envCube
-envFacade
-envFog
-envSky
-envSphere
-environmentFog
-eulerToQuat
-explodeNurbsShell
-expression
-extendCurve
-extendCurveDistanceManip
-extendSurface
-extendSurfaceDistanceManip
-extrude
-extrudeManip
-facade
-ffBlendSrf
-ffBlendSrfObsolete
-ffFilletSrf
-ffd
-fieldManip
-fieldsManip
-file
-filletCurve
-fitBspline
-flexorShape
-flow
-fluidEmitter
-fluidShape
-fluidSliceManip
-fluidTexture2D
-fluidTexture3D
-follicle
-forceUpdateManip
-fosterParent
-fourByFourMatrix
-fractal
-frameCache
-freePointManip
-freePointTriadManip
-gammaCorrect
-geoConnectable
-geoConnector
-geometryConstraint
-geometryFilter
-geometryOnLineManip
-geometryVarGroup
-glBox
-glCone
-glCylinder
-glSphere
-glTorus
-globalCacheControl
-globalStitch
-gpuCache
-granite
-gravityField
-greasePencilSequence
-greasePlane
-greasePlaneRenderShape
-grid
-groupId
-groupParts
-guide
-hairConstraint
-hairSystem
-hairTubeShader
-hardenPoint
-hardwareRenderGlobals
-hardwareRenderingGlobals
-heightField
-hierarchyTestNode1
-hierarchyTestNode2
-hierarchyTestNode3
-hikEffector
-hikFKJoint
-hikFloorContactMarker
-hikGroundPlane
-hikHandle
-hikIKEffector
-hikSolver
-historySwitch
-holdMatrix
-hsvToRgb
-hwReflectionMap
-hwRenderGlobals
-hyperGraphInfo
-hyperLayout
-hyperView
-ik2Bsolver
-ikEffector
-ikHandle
-ikMCsolver
-ikPASolver
-ikRPManip
-ikRPsolver
-ikSCsolver
-ikSplineManip
-ikSplineSolver
-ikSpringSolver
-ikSystem
-imagePlane
-implicitBox
-implicitCone
-implicitSphere
-indexManip
-insertKnotCurve
-insertKnotSurface
-instancer
-intersectSurface
-inverseMatrix
-isoparmManip
-jiggle
-joint
-jointCluster
-jointClusterManip
-jointFfd
-jointLattice
-jointTranslateManip
-keyframeRegionManip
-keyingGroup
-lambert
-lattice
-layeredShader
-layeredTexture
-leastSquaresModifier
-leather
-lightFog
-lightInfo
-lightLinker
-lightList
-lightManip
-limitManip
-lineManip
-lineModifier
-locator
-lodGroup
-lodThresholds
-loft
-lookAt
-luminance
-makeGroup
-makeIllustratorCurves
-makeNurbCircle
-makeNurbCone
-makeNurbCube
-makeNurbCylinder
-makeNurbPlane
-makeNurbSphere
-makeNurbTorus
-makeNurbsSquare
-makeTextCurves
-makeThreePointCircularArc
-makeThreePointCircularArcManip
-makeTwoPointCircularArc
-makeTwoPointCircularArcManip
-mandelbrot
-mandelbrot3D
-manip2DContainer
-manipContainer
-marble
-markerManip
-materialFacade
-materialInfo
-membrane
-mentalrayTexture
-mesh
-meshVarGroup
-motionPath
-motionPathManip
-motionTrail
-motionTrailShape
-mountain
-moveBezierHandleManip
-moveVertexManip
-movie
-mpBirailSrf
-multDoubleLinear
-multMatrix
-multilisterLight
-multiplyDivide
-mute
-nCloth
-nComponent
-nParticle
-nRigid
-nearestPointOnCurve
-network
-newtonField
-newtonManip
-nexManip
-noise
-nonLinear
-normalConstraint
-nucleus
-nurbsCurve
-nurbsCurveToBezier
-nurbsSurface
-nurbsTessellate
-nurbsToSubdiv
-nurbsToSubdivProc
-objectAttrFilter
-objectBinFilter
-objectFilter
-objectMultiFilter
-objectNameFilter
-objectRenderFilter
-objectScriptFilter
-objectSet
-objectTypeFilter
-ocean
-oceanShader
-offsetCos
-offsetCosManip
-offsetCurve
-offsetCurveManip
-offsetSurface
-offsetSurfaceManip
-oldBlindDataBase
-oldGeometryConstraint
-oldNormalConstraint
-oldTangentConstraint
-opticalFX
-orientConstraint
-orientationMarker
-pairBlend
-paramDimension
-parentConstraint
-particle
-particleAgeMapper
-particleCloud
-particleColorMapper
-particleIncandMapper
-particleSamplerInfo
-particleTranspMapper
-partition
-passContributionMap
-passMatrix
-pfxHair
-pfxToon
-phong
-phongE
-pivot2dManip
-pivotAndOrientManip
-place2dTexture
-place3dTexture
-planarProjManip
-planarTrimSurface
-plusMinusAverage
-pointConstraint
-pointEmitter
-pointLight
-pointMatrixMult
-pointOnCurveInfo
-pointOnCurveManip
-pointOnLineManip
-pointOnPolyConstraint
-pointOnSurfManip
-pointOnSurfaceInfo
-pointOnSurfaceManip
-poleVectorConstraint
-polyAppend
-polyAppendVertex
-polyAutoProj
-polyAutoProjManip
-polyAverageVertex
-polyBevel
-polyBlindData
-polyBoolOp
-polyBridgeEdge
-polyChipOff
-polyCloseBorder
-polyCollapseEdge
-polyCollapseF
-polyColorDel
-polyColorMod
-polyColorPerVertex
-polyCone
-polyConnectComponents
-polyCopyUV
-polyCrease
-polyCreaseEdge
-polyCreateFace
-polyCreateToolManip
-polyCube
-polyCut
-polyCutManip
-polyCutManipContainer
-polyCylProj
-polyCylinder
-polyDelEdge
-polyDelFacet
-polyDelVertex
-polyDuplicateEdge
-polyEdgeToCurve
-polyEditEdgeFlow
-polyExtrudeEdge
-polyExtrudeFace
-polyExtrudeManip
-polyExtrudeManipContainer
-polyExtrudeVertex
-polyFlipEdge
-polyFlipUV
-polyHelix
-polyHoleFace
-polyLayoutUV
-polyMapCut
-polyMapDel
-polyMapSew
-polyMapSewMove
-polyMappingManip
-polyMergeEdge
-polyMergeFace
-polyMergeUV
-polyMergeVert
-polyMergeVertsManip
-polyMirror
-polyModifierManip
-polyMoveEdge
-polyMoveFace
-polyMoveFacetUV
-polyMoveUV
-polyMoveUVManip
-polyMoveVertex
-polyMoveVertexManip
-polyNormal
-polyNormalPerVertex
-polyNormalizeUV
-polyOptUvs
-polyPipe
-polyPlanarProj
-polyPlane
-polyPlatonicSolid
-polyPoke
-polyPokeManip
-polyPrimitiveMisc
-polyPrism
-polyProj
-polyProjManip
-polyProjectCurve
-polyPyramid
-polyQuad
-polyReduce
-polySelectEditFeedbackManip
-polySeparate
-polySewEdge
-polySmooth
-polySmoothFace
-polySmoothProxy
-polySoftEdge
-polySphProj
-polySphere
-polySpinEdge
-polySplit
-polySplitEdge
-polySplitRing
-polySplitToolManip1
-polySplitVert
-polyStraightenUVBorder
-polySubdEdge
-polySubdFace
-polyToSubdiv
-polyToolFeedbackManip
-polyTorus
-polyTransfer
-polyTriangulate
-polyTweak
-polyTweakUV
-polyUVRectangle
-polyUnite
-polyVertexNormalManip
-polyWedgeFace
-positionMarker
-postProcessList
-precompExport
-projectCurve
-projectTangent
-projectTangentManip
-projection
-projectionManip
-projectionMultiManip
-projectionUVManip
-propModManip
-propMoveTriadManip
-proxyManager
-psdFileTex
-quadPtOnLineManip
-quadShadingSwitch
-quatAdd
-quatConjugate
-quatInvert
-quatNegate
-quatNormalize
-quatProd
-quatSub
-quatToEuler
-radialField
-ramp
-rampShader
-rbfSrf
-rbfSrfManip
-rebuildCurve
-rebuildSurface
-record
-reference
-remapColor
-remapHsv
-remapValue
-renderBox
-renderCone
-renderGlobals
-renderGlobalsList
-renderLayer
-renderLayerManager
-renderPass
-renderPassSet
-renderQuality
-renderRect
-renderSphere
-renderTarget
-renderedImageSource
-resolution
-resultCurveTimeToAngular
-resultCurveTimeToLinear
-resultCurveTimeToTime
-resultCurveTimeToUnitless
-reverse
-reverseCurve
-reverseCurveManip
-reverseSurface
-reverseSurfaceManip
-revolve
-revolveManip
-revolvedPrimitiveManip
-rgbToHsv
-rigidBody
-rigidConstraint
-rigidSolver
-rock
-rotateHelper
-rotateLimitsManip
-rotateManip
-rotateUV2dManip
-roundConstantRadius
-roundConstantRadiusManip
-roundRadiusCrvManip
-roundRadiusManip
-sampler
-samplerInfo
-scaleConstraint
-scaleLimitsManip
-scaleManip
-scaleUV2dManip
-screenAlignedCircleManip
-script
-scriptManip
-sculpt
-selectionListOperator
-sequenceManager
-sequencer
-setRange
-shaderGlow
-shadingEngine
-shadingMap
-shellTessellate
-shot
-simpleTestNode
-simpleVolumeShader
-singleShadingSwitch
-sketchPlane
-skinBinding
-skinCluster
-smoothCurve
-smoothTangentSrf
-snapshot
-snapshotShape
-snow
-softMod
-softModHandle
-softModManip
-solidFractal
-spBirailSrf
-sphericalProjManip
-spotCylinderManip
-spotLight
-spotManip
-spring
-squareSrf
-squareSrfManip
-stencil
-stereoRigCamera
-stitchAsNurbsShell
-stitchSrf
-stitchSrfManip
-stroke
-strokeGlobals
-stucco
-styleCurve
-subCurve
-subSurface
-subdAddTopology
-subdAutoProj
-subdBlindData
-subdCleanTopology
-subdHierBlind
-subdLayoutUV
-subdMapCut
-subdMapSewMove
-subdMappingManip
-subdPlanarProj
-subdProjManip
-subdTweak
-subdTweakUV
-subdiv
-subdivCollapse
-subdivComponentId
-subdivReverseFaces
-subdivSurfaceVarGroup
-subdivToNurbs
-subdivToPoly
-substance
-substanceOutput
-surfaceEdManip
-surfaceInfo
-surfaceLuminance
-surfaceShader
-surfaceVarGroup
-symmetryConstraint
-tangentConstraint
-texLattice
-texLatticeDeformManip
-texMoveShellManip
-texSmoothManip
-texSmudgeUVManip
-textButtonManip
-textManip2D
-texture3dManip
-textureBakeSet
-textureToGeom
-time
-timeFunction
-timeToUnitConversion
-timeWarp
-toggleManip
-toggleOnLineManip
-toolDrawManip
-toolDrawManip2D
-toonLineAttributes
-towPointOnCurveManip
-towPointOnSurfaceManip
-trans2dManip
-transUV2dManip
-transferAttributes
-transform
-transformGeometry
-translateLimitsManip
-translateManip
-translateUVManip
-transposeMatrix
-trim
-trimManip
-trimWithBoundaries
-triplanarProjManip
-tripleShadingSwitch
-trsInsertManip
-trsManip
-turbulenceField
-turbulenceManip
-tweak
-uniformField
-unitConversion
-unitToTimeConversion
-unknown
-unknownDag
-unknownTransform
-untrim
-useBackground
-uv2dManip
-uvChooser
-vectorProduct
-vectorRenderGlobals
-vertexBakeSet
-viewColorManager
-volumeAxisField
-volumeBindManip
-volumeFog
-volumeLight
-volumeNoise
-volumeShader
-vortexField
-water
-weightGeometryFilter
-wire
-wood
-wrap
-writeToColorBuffer
-writeToDepthBuffer
-writeToLabelBuffer
-writeToVectorBuffer
-wtAddMatrix
-xformManip
+def maya_main_window():
+    '''
+    Return the Maya main window as a Python object
+    '''
+    main_window_ptr = omui.MQtUtil.mainWindow()
+    return wrapInstance( long( main_window_ptr ), QtGui.QWidget )
 
 
+class MainWindow( QtGui.QDialog ):
+    def __init__( self, parent=maya_main_window() ):
+        super( MainWindow, self ).__init__( parent )
+        
+        self.winName = 'My Main Window'        
+        self.create()
+        
+    def create( self ):
+        # Check to see if this UI is already open. If it is then delete it before
+        # creating it anew.
+        if cmds.window( self.winName, exists=True ):
+            cmds.deleteUI( self.winName )
+
+        layout = QtGui.QVBoxLayout()
+        testWidget = MainWidget()
+        layout.addWidget( testWidget )
+        self.setLayout( layout )
+        
+        
+class MainWidget( QtGui.QWidget ):
+    def __init__( self, parent=None ):
+        super( MainWidget, self ).__init__( parent )
+        
+        self.pen = QtGui.QPen( QtCore.Qt.SolidLine )
+        self.pen.setColor( QtCore.Qt.red )
+        self.pen.setWidth( 2 )
+        
+        self.brush = QtGui.QBrush( QtGui.QColor( 30,56,209,100 ) )
+        
+        self.pixmap = QtGui.QPixmap( ':/riggingUI/icons/bg_test.png' )
+        self.pixmapItem = QtGui.QGraphicsPixmapItem( self.pixmap )
+        #self.pixmapItem = MyPixmapItem( self.pixmap )
+        
+        self.scene = QtGui.QGraphicsScene()
+        self.scene.addItem( self.pixmapItem )
+        
+        # Polygon draw
+        polyOffset = [200, 200]
+        polyPoints = [[0,0],[0,100],[100,100],[100,0]]
+        polyShape = QtGui.QPolygonF()
+        for i in polyPoints:
+            polyShape.append( QtCore.QPointF( i[0]+polyOffset[0], i[1]+polyOffset[1] ) )
+        polyItem = MyPolygonItem( polyShape )
+        self.scene.addItem( polyItem )
+        
+        self.view = QtGui.QGraphicsView( self.scene )
+        
+        layout = QtGui.QVBoxLayout()
+        layout.addWidget( self.view )
+        self.setLayout( layout )
+        
+        
+class MyPixmapItem( QtGui.QGraphicsPixmapItem ):
+    def __init__( self, pixmap=None ):
+        super( MyPixmapItem, self ).__init__( pixmap )
+        
+        self.setAcceptHoverEvents( True )
+        
+    def hoverEnterEvent( self, event ):
+        pass
+        
+    def hoverLeaveEvent( self, event ):
+        pass
+        
+    def hoverMoveEvent( self, event ):
+        pass
+    
+
+class MyPolygonItem( QtGui.QGraphicsPolygonItem ):
+    def __init__( self, polygon=None ):
+        super( MyPolygonItem, self ).__init__( polygon )
+        
+        self.polygon = polygon
+        
+        self.setAcceptHoverEvents( True )
+        
+        self.active = False
+        
+        # Hover pen and brush
+        self.hoverPen = QtGui.QPen( QtCore.Qt.SolidLine )
+        self.hoverPen.setColor( QtCore.Qt.black )
+        self.hoverPen.setWidth( 2 )
+        self.hoverBrush = QtGui.QBrush( QtGui.QColor( 30,156,209,100 ) )
+        
+        # Leave pen and brush. Also the default colors.
+        self.leavePen = QtGui.QPen( QtCore.Qt.SolidLine )
+        self.leavePen.setColor( QtCore.Qt.red )
+        self.leavePen.setWidth( 2 )
+        self.leaveBrush = QtGui.QBrush( QtGui.QColor( 30,56,209,100 ) )
+        
+        # Mouse press pen and brush.
+        self.activePen = QtGui.QPen( QtCore.Qt.DotLine )
+        self.activePen.setColor( QtCore.Qt.green )
+        self.activePen.setWidth( 4 )
+        self.activeBrush = QtGui.QBrush( QtGui.QColor( 130,56,209,100 ) )
+        
+        # Setup the default pen and brush
+        self.setPen( self.leavePen )
+        self.setBrush( self.leaveBrush )
+        
+    def hoverEnterEvent( self, event ):
+        if self.active:
+            self.setPen( self.pressPen )
+            self.setBrush( self.activeBrush )
+        else:
+            self.setPen( self.hoverPen )
+            self.setBrush( self.hoverBrush )
+        
+    def hoverLeaveEvent( self, event ):
+        if self.active:
+            self.setPen( self.pressPen )
+            self.setBrush( self.activeBrush )
+        else:
+            self.setPen( self.leavePen )
+            self.setBrush( self.leaveBrush )
+        
+    def hoverMoveEvent( self, event ):
+        pass
+
+    def mousePressEvent( self, event ):
+        if not self.active:   
+            self.setPen( self.activePen )
+            self.setBrush( self.activeBrush )
+            self.active = True
+        else:
+            self.setPen( self.hoverPen )
+            self.setBrush( self.hoverBrush )
+            self.active = False
+'''
+    RUN THE WINDOW
+'''
+testUI = MainWindow()
+testUI.show()

@@ -28,11 +28,12 @@ def getCharacterChildrenModules( inCharNode ):
     modules = []
     for child in children:
         childComponents = NodeUtility.getModuleComponentSettings( child )
-        for comp in childComponents:
-            if NodeUtility.attributeCheck( comp, 'characterRoot' ):
-                aType = cmds.getAttr( '{0}.classType'.format( comp ) )
-                if aType == 'ModuleRootComponent':
-                    modules.append( comp )
+        if childComponents is not None:
+            for comp in childComponents:
+                if NodeUtility.attributeCheck( comp, 'characterRoot' ):
+                    aType = cmds.getAttr( '{0}.classType'.format( comp ) )
+                    if aType == 'ModuleRootComponent':
+                        modules.append( comp )
                 
     return modules
 

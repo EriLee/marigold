@@ -4,5 +4,11 @@
 <path>/${PROJECT_DIR_NAME}</path>
 </pydev_pathproperty>
 <pydev_property name="org.python.pydev.PYTHON_PROJECT_VERSION">python 2.7</pydev_property>
-<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">Maya2014</pydev_property>
+<pydev_property name="org.python.pydev.PYTHON_PROJECT_INTERPRETER">MayaPython</pydev_property>
+<pydev_pathproperty name="org.python.pydev.PROJECT_EXTERNAL_SOURCE_PATH">
+<path>E:\maya\scripts\marigold</path>
+<path>E:\Autodesk\Maya2014\Python\Lib\site-packages\maya</path>
+<path>E:\Autodesk\Maya2014\Python\Lib\site-packages\PySide</path>
+<path>E:\Autodesk\Maya2014\Python\Lib\site-packages\pysideuic</path>
+</pydev_pathproperty>
 </pydev_project>

@@ -38,6 +38,14 @@ def connectNodes( inParentObj, inParentPlug, inChildObj, inChildPlug ):
     MDGMod.doIt()
     
 def disconnectNodes( inParentObj, inParentPlug, inChildObj, inChildPlug ):
+    '''
+    Disconnects two nodes using the API.
+    
+    @param inParentObj: String. Name of the parent node.
+    @param inParentPlug: String. Name of plug on the parent node.
+    @param inChildObj: String. Name of child node.
+    @param inChildPlug: String. Name of plug on the child node.
+     '''
     parentPlug = getPlug( inParentObj, inParentPlug )
     childPlug = getPlug( inChildObj, inChildPlug )
     MDGMod = OpenMaya.MDGModifier()
@@ -273,7 +281,10 @@ def getPlugValue( inPlug ):
         
 def setPlugValue( inPlug, inValue ):
     '''
-    @param inPlug: MPlug. The node plug.
+    Sets the given plug's value to the passed in value.
+
+    @param *inPlug*: _MPlug_. The node plug.
+    @param *inValue*: _Type_. Any value of any data type.
     '''
     pAttribute = inPlug.attribute()
     apiType = pAttribute.apiType()

@@ -25,5 +25,6 @@
     <file>icons/preset_module.png</file>
     <file>icons/preset_character.png</file>
     <file>icons/icon_refresh20.png</file>
+    <file>icons/bg_test.png</file>
   </qresource>
 </RCC>

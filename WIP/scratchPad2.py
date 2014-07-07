@@ -185,10 +185,9 @@ class BitModule( object ):
             createSpacer( bits[0], inGroupName=moduleGrpName, inTargetObject=bits[0], inDoParent=False, inPrefix=None )
         
         builtControls = []
-        tempBuildDict = {}
         
         for index,bit in enumerate( bits ):
-            print '        build: {0}'.format( bit )
+            #print '        build: {0}'.format( bit )
             bitControl = None
             
             # NEED TO ADD ALL POSSIBLE CONTROL TYPES HERE!!!!!
@@ -205,7 +204,7 @@ class BitModule( object ):
                 # Get the first parent bit with a curve control component that we find in the
                 # hierarchy of the module.
                 firstParent = self.getFirstParentWithinModule( bit, 'CurveControlComponent' )
-                print '            firstParent: {0}'.format( firstParent )
+                #print '            firstParent: {0}'.format( firstParent )
                     
             if bitControl is not None:
                 # Now handle any hierarchy setup.
@@ -213,11 +212,10 @@ class BitModule( object ):
                 if index > 0:
                     # If there is a parent control in the module then do the parenting.
                     if firstParent is not None:
-                        parentJointName = cmds.getAttr( '{0}.controlName'.format( firstParent ) )
-                        print '                parentJointName: {0}'.format( parentJointName )
-                        print '                tempBuildDict: {0}'.format( tempBuildDict )
-                        parentJointFullName = tempBuildDict[ parentJointName ]
-                        cmds.parent( spacerGrpName, parentJointFullName )
+                        parentControlName = cmds.getAttr( '{0}.controlName'.format( firstParent ) )
+                        #print '                parentJointName: {0}'.format( parentJointName )
+                        #print '                tempBuildDict: {0}'.format( tempBuildDict )
+                        cmds.parent( spacerGrpName, parentControlName )
                     else:
                         # If there is no parent control in the module then we 
                         # parent it to the module group.
@@ -229,9 +227,12 @@ class BitModule( object ):
                     cmds.parent( spacerGrpName, moduleGrpName )
                 
                 # Add joint to the built joint list dict.
-                fnDagPath = OpenMaya.MFnDagNode( bitControl )
-                tempBuildDict[controlName] = fnDagPath.fullPathName()
-                builtControls.append( { controlName:fnDagPath.fullPathName() } )
+                #fnDagPath = OpenMaya.MFnDagNode( bitControl )
+                #tempBuildDict[controlName] = fnDagPath.fullPathName()
+                #builtControls.append( { controlName:fnDagPath.fullPathName() } )
+                
+                # Control Name: Spacer Name
+                builtControls.append( [ bit, controlName, spacerGrpName ] )
                 
         if not builtControls:
             builtControls = None
@@ -274,19 +275,48 @@ class BitModule( object ):
         builtControls = self.buildControls()
         if inRigGroup is not None and builtControls is not None:
             # NEED TO HANDLE ALL KINDS OF CONTROL OBJECTS.
-            
-            # THIS ISN'T ALWAYS A HIERARCHY. NEED TO LOOP THROUGH EACH BIT AND MOVE THINGS THAT WAY!!!!
-            firstParentWithControl = self.getFirstParentWithComponentClass( self.moduleRootBit, 'CurveControlComponent' )
-            print '    firstParentWithControl: {0}'.format( firstParentWithControl )
-            if firstParentWithControl:
-                parentControlName = cmds.getAttr( '{0}.controlName'.format( firstParentWithControl ) )
-                print '    parentControlName: {0}'.format( parentControlName )
-                groupCheck = searchGroup( inRigGroup, None, parentControlName )
-                if groupCheck:
-                    print '    thing: {0}'.format( builtControls[0].values() )
-                    cmds.parent( builtControls[0].values(), groupCheck )
-            else:
-                cmds.parent( builtControls[0].values(), inRigGroup )
+            for controlInfo in builtControls:
+                bitName = controlInfo[0]                
+                controlName = controlInfo[1]
+                controlSpacer = controlInfo[2]
+                print '        control name: {0}'.format( controlName )
+                print '        control spacer: {0}'.format( controlSpacer )
+                
+                print '        bit name: {0}'.format( bitName )
+                firstParentWithControl = self.getFirstParentWithComponentClass( bitName, 'CurveControlComponent' )
+                print '        firstParentWithControl: {0}'.format( firstParentWithControl )
+                
+                if firstParentWithControl is not None:
+                    parentControlName = cmds.getAttr( '{0}.controlName'.format( firstParentWithControl ) )
+                    print '            parentControlName: {0}'.format( parentControlName )
+                    
+                    groupCheck = searchGroup( inRigGroup, None, parentControlName )
+                    print '            groupCheck: {0}'.format( groupCheck )
+                    
+                    if groupCheck:
+                        # Check to see if the object's parent is already correct.
+                        mObj = NodeUtility.getDependNode( controlSpacer )
+                        fn = OpenMaya.MFnDagNode()    
+                        fn.setObject( mObj )
+        
+                        for index in xrange( fn.parentCount() ):
+                            fnParent = OpenMaya.MFnDagNode()
+                            parent = fn.parent( index )
+                            fnParent.setObject( parent )
+                            parentName = fnParent.name()
+                            print '        parentName: {0}'.format( parentName )
+                            
+                            splitString = groupCheck.split( '|' )
+                            testString = splitString[-1]
+                            print testString
+                            
+                        # If the object's current parent is not the desired one then
+                        # do the correct parenting.
+                        if testString != parentName:
+                            cmds.parent( controlSpacer, groupCheck )                    
+                else:
+                    cmds.parent( controlSpacer, inRigGroup )
+                print '        END'
         
 class BitCharacter( object ):
     def __init__( self, inCharacterNode=None ):
@@ -492,9 +522,11 @@ def compareLists( list1, list2 ):
 #thing = BitModule( module )
 #thing.buildJoints()
 
-characters = 'CharacterRootComponent1'
+characters = 'CharacterRootComponent'
 character = BitCharacter( characters )
 character.buildCharacter()
+
+#thing = BitModule.getFirstParentWithComponentClass( inBit, inComponentClass)
 
 #thing = BitModule( 'ModuleRootComponent2' )
 #bits = thing.getBits()
